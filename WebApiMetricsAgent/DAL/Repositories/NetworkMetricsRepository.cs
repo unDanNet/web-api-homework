@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
-using WebApiMetricsAgent.Interfaces;
-using WebApiMetricsAgent.Models.Entities;
+using WebApiMetricsAgent.DAL.Interfaces;
+using WebApiMetricsAgent.DAL.Models;
 
-namespace WebApiMetricsAgent.Repositories
+namespace WebApiMetricsAgent.DAL.Repositories
 {
-	public interface INetworkMetricsRepository : IRepository<NetworkMetric> {}
-	
-	
 	public class NetworkMetricsRepository : INetworkMetricsRepository
 	{
 		private const string CONNECTION_STRING = "Data Source=metrics.db;Version=3;Pooling=true;Max Pool Size=100";

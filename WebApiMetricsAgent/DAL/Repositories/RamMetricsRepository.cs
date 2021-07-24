@@ -1,74 +1,73 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
-using WebApiMetricsAgent.Interfaces;
-using WebApiMetricsAgent.Models.Entities;
+using WebApiMetricsAgent.DAL.Interfaces;
+using WebApiMetricsAgent.DAL.Models;
 
-namespace WebApiMetricsAgent.Repositories
+namespace WebApiMetricsAgent.DAL.Repositories
 {
-	public interface IDotnetMetricsRepository : IRepository<DotnetMetric> {}
-	
-	
-	public class DotnetMetricsRepository : IDotnetMetricsRepository
+	public class RamMetricsRepository : IRamMetricsRepository
 	{
 		private const string CONNECTION_STRING = "Data Source=metrics.db;Version=3;Pooling=true;Max Pool Size=100";
-		private const string TABLE_NAME = "dotnetmetrics";
+		private const string TABLE_NAME = "cpumetrics";
 		
-		
-		public IList<DotnetMetric> GetAllItems()
+		public IList<RamMetric> GetAllItems()
 		{
-			var result = new List<DotnetMetric>();
-
+			var result = new List<RamMetric>();
+			
+			// open the connection to the database
 			using (var connection = new SQLiteConnection(CONNECTION_STRING))
 			{
 				connection.Open();
-				
+
+				// create the command that will be sent to the database
 				using var command = new SQLiteCommand(connection) {
 					CommandText = $"SELECT * FROM {TABLE_NAME}"
-				};
-
+				}; 
+				
+				// start reading the data from the table
 				using (SQLiteDataReader reader = command.ExecuteReader())
 				{
 					while (reader.Read())
 					{
-						result.Add(new DotnetMetric {
+						result.Add(new RamMetric{
 							Id = reader.GetInt32(0),
-							ErrorsCount = reader.GetInt32(1),
+							MemoryAvailable = reader.GetInt32(1),
 							Time = TimeSpan.FromSeconds(reader.GetInt32(2))
 						});
 					}
 				}
 			}
-
+			
 			return result;
 		}
 
-		public DotnetMetric GetItemById(int id)
+		public RamMetric GetItemById(int id)
 		{
 			using (var connection = new SQLiteConnection(CONNECTION_STRING))
 			{
 				connection.Open();
-
+				
 				using var command = new SQLiteCommand(connection) {
-					CommandText = $"SELECT * FROM {TABLE_NAME} WHERE id = @id"
+					CommandText = $"SELECT * FROM {TABLE_NAME} WHERE id = @id",
 				};
 
 				command.Parameters.AddWithValue("@id", id);
 
 				using (SQLiteDataReader reader = command.ExecuteReader())
 				{
-					return reader.Read() ? new DotnetMetric {
-						Id = reader.GetInt32(0),
-						ErrorsCount = reader.GetInt32(1),
+					return reader.Read() ? new RamMetric {
+						Id = reader.GetInt32(0), 
+						MemoryAvailable = reader.GetInt32(1), 
 						Time = TimeSpan.FromSeconds(reader.GetInt32(2))
 					} : null;
 				}
 			}
 		}
 
-		public IList<DotnetMetric> GetItemsByTimePeriod(TimeSpan fromTime, TimeSpan toTime)
+		public IList<RamMetric> GetItemsByTimePeriod(TimeSpan fromTime, TimeSpan toTime)
 		{
-			var result = new List<DotnetMetric>();
+			var result = new List<RamMetric>();
 			
 			using (var connection = new SQLiteConnection(CONNECTION_STRING))
 			{
@@ -85,9 +84,9 @@ namespace WebApiMetricsAgent.Repositories
 				{
 					while (reader.Read())
 					{
-						result.Add(new DotnetMetric {
-							Id = reader.GetInt32(0),
-							ErrorsCount = reader.GetInt32(1),
+						result.Add(new RamMetric {
+							Id = reader.GetInt32(0), 
+							MemoryAvailable = reader.GetInt32(1), 
 							Time = TimeSpan.FromSeconds(reader.GetInt32(2))
 						});
 					}
@@ -97,38 +96,38 @@ namespace WebApiMetricsAgent.Repositories
 			return result;
 		}
 
-		public void AddItem(DotnetMetric item)
+		public void AddItem(RamMetric item)
 		{
 			using (var connection = new SQLiteConnection(CONNECTION_STRING))
 			{
 				connection.Open();
 
 				using var command = new SQLiteCommand(connection) {
-					CommandText = $"INSERT INTO {TABLE_NAME}(errorsCount, time) VALUES(@errorsCount, @time)"
+					CommandText = $"INSERT INTO {TABLE_NAME}(memoryAvailable, time) VALUES(@memoryAvailable, @time)"
 				};
-
-				command.Parameters.AddWithValue("@errorsCount", item.ErrorsCount);
-				command.Parameters.AddWithValue("@time", item.Time.TotalSeconds);
 				
-				command.Prepare();
-				command.ExecuteNonQuery();
+				command.Parameters.AddWithValue("@memoryAvailable", item.MemoryAvailable); // add the value for the 'memoryAvailable' parameter
+				command.Parameters.AddWithValue("@time", item.Time.TotalSeconds); // add the value for the 'time' parameter
+				
+				command.Prepare(); // prepare command for the execution
+				command.ExecuteNonQuery(); // execute the command
 			}
 		}
 
-		public void UpdateItem(DotnetMetric item)
+		public void UpdateItem(RamMetric item)
 		{
-			using (var connection = new SQLiteConnection(CONNECTION_STRING))
+			using (var connection = new SQLiteConnection(CONNECTION_STRING))	
 			{
 				connection.Open();
-				
+
 				using var command = new SQLiteCommand(connection) {
-					CommandText = $"UPDATE {TABLE_NAME} SET errorsCount = @errorsCount, time = @time WHERE id = @id"
+					CommandText = $"UPDATE {TABLE_NAME} SET memoryAvailable = @memoryAvailable, time = @time WHERE id = @id"
 				};
 
-				command.Parameters.AddWithValue("@errorsCount", item.ErrorsCount);
-				command.Parameters.AddWithValue("@time", item.Time.TotalSeconds);
 				command.Parameters.AddWithValue("@id", item.Id);
-
+				command.Parameters.AddWithValue("@memoryAvailable", item.MemoryAvailable);
+				command.Parameters.AddWithValue("@time", item.Time.TotalSeconds);
+				
 				command.Prepare();
 				command.ExecuteNonQuery();
 			}
@@ -139,7 +138,7 @@ namespace WebApiMetricsAgent.Repositories
 			using (var connection = new SQLiteConnection(CONNECTION_STRING))
 			{
 				connection.Open();
-				
+
 				using var command = new SQLiteCommand(connection) {
 					CommandText = $"DELETE FROM {TABLE_NAME} WHERE id = @id"
 				};
@@ -150,5 +149,6 @@ namespace WebApiMetricsAgent.Repositories
 				command.ExecuteNonQuery();
 			}
 		}
+
 	}
 }

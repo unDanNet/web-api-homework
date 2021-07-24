@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace WebApiMetricsAgent.Models.DTO
+namespace WebApiMetricsAgent.DTO.Entities
 {
 	public class DotnetMetricDto
 	{

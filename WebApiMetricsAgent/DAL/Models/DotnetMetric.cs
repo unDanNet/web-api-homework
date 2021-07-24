@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace WebApiMetricsAgent.Models.Entities
+namespace WebApiMetricsAgent.DAL.Models
 {
 	public class DotnetMetric
 	{

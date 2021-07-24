@@ -11,8 +11,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.Data.SQLite;
-using WebApiMetricsAgent.Interfaces;
-using WebApiMetricsAgent.Repositories;
+using WebApiMetricsAgent.DAL.Interfaces;
+using WebApiMetricsAgent.DAL.Repositories;
 
 namespace WebApiMetricsAgent
 {

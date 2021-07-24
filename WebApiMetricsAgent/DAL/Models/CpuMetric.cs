@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace WebApiMetricsAgent.Models.DTO
+namespace WebApiMetricsAgent.DAL.Models
 {
-	public class CpuMetricDto
+	public class CpuMetric
 	{
 		public int Id { get; set; }
 		public int Value { get; set; }

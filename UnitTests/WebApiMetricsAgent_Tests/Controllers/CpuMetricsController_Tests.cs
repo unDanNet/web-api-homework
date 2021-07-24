@@ -4,7 +4,8 @@ using Moq;
 using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 using WebApiMetricsAgent.Controllers;
-using WebApiMetricsAgent.Repositories;
+using WebApiMetricsAgent.DAL.Interfaces;
+using WebApiMetricsAgent.DAL.Repositories;
 
 namespace UnitTests.WebApiMetricsAgent_Tests.Controllers
 {

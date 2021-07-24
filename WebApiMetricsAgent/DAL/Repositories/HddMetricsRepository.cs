@@ -1,22 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
-using WebApiMetricsAgent.Interfaces;
-using WebApiMetricsAgent.Models.Entities;
+using WebApiMetricsAgent.DAL.Interfaces;
+using WebApiMetricsAgent.DAL.Models;
 
-namespace WebApiMetricsAgent.Repositories
+namespace WebApiMetricsAgent.DAL.Repositories
 {
-	public interface IRamMetricsRepository : IRepository<RamMetric> {}
-	
-	
-	public class RamMetricsRepository : IRamMetricsRepository
+	public class HddMetricsRepository : IHddMetricsRepository
 	{
 		private const string CONNECTION_STRING = "Data Source=metrics.db;Version=3;Pooling=true;Max Pool Size=100";
-		private const string TABLE_NAME = "cpumetrics";
+		private const string TABLE_NAME = "hddmetrics";
 		
-		public IList<RamMetric> GetAllItems()
+		public IList<HddMetric> GetAllItems()
 		{
-			var result = new List<RamMetric>();
+			var result = new List<HddMetric>();
 			
 			// open the connection to the database
 			using (var connection = new SQLiteConnection(CONNECTION_STRING))
@@ -33,9 +30,9 @@ namespace WebApiMetricsAgent.Repositories
 				{
 					while (reader.Read())
 					{
-						result.Add(new RamMetric{
+						result.Add(new HddMetric{
 							Id = reader.GetInt32(0),
-							MemoryAvailable = reader.GetInt32(1),
+							SpaceLeft = reader.GetInt32(1),
 							Time = TimeSpan.FromSeconds(reader.GetInt32(2))
 						});
 					}
@@ -45,7 +42,7 @@ namespace WebApiMetricsAgent.Repositories
 			return result;
 		}
 
-		public RamMetric GetItemById(int id)
+		public HddMetric GetItemById(int id)
 		{
 			using (var connection = new SQLiteConnection(CONNECTION_STRING))
 			{
@@ -59,18 +56,18 @@ namespace WebApiMetricsAgent.Repositories
 
 				using (SQLiteDataReader reader = command.ExecuteReader())
 				{
-					return reader.Read() ? new RamMetric {
+					return reader.Read() ? new HddMetric {
 						Id = reader.GetInt32(0), 
-						MemoryAvailable = reader.GetInt32(1), 
+						SpaceLeft = reader.GetInt32(1), 
 						Time = TimeSpan.FromSeconds(reader.GetInt32(2))
 					} : null;
 				}
 			}
 		}
 
-		public IList<RamMetric> GetItemsByTimePeriod(TimeSpan fromTime, TimeSpan toTime)
+		public IList<HddMetric> GetItemsByTimePeriod(TimeSpan fromTime, TimeSpan toTime)
 		{
-			var result = new List<RamMetric>();
+			var result = new List<HddMetric>();
 			
 			using (var connection = new SQLiteConnection(CONNECTION_STRING))
 			{
@@ -87,9 +84,9 @@ namespace WebApiMetricsAgent.Repositories
 				{
 					while (reader.Read())
 					{
-						result.Add(new RamMetric {
-							Id = reader.GetInt32(0), 
-							MemoryAvailable = reader.GetInt32(1), 
+						result.Add(new HddMetric {
+							Id = reader.GetInt32(0),
+							SpaceLeft = reader.GetInt32(1),
 							Time = TimeSpan.FromSeconds(reader.GetInt32(2))
 						});
 					}
@@ -99,17 +96,17 @@ namespace WebApiMetricsAgent.Repositories
 			return result;
 		}
 
-		public void AddItem(RamMetric item)
+		public void AddItem(HddMetric item)
 		{
 			using (var connection = new SQLiteConnection(CONNECTION_STRING))
 			{
 				connection.Open();
 
 				using var command = new SQLiteCommand(connection) {
-					CommandText = $"INSERT INTO {TABLE_NAME}(memoryAvailable, time) VALUES(@memoryAvailable, @time)"
+					CommandText = $"INSERT INTO {TABLE_NAME}(spaceLeft, time) VALUES(@spaceLeft, @time)"
 				};
 				
-				command.Parameters.AddWithValue("@memoryAvailable", item.MemoryAvailable); // add the value for the 'memoryAvailable' parameter
+				command.Parameters.AddWithValue("@spaceLeft", item.SpaceLeft); // add the value for the 'spaceLeft' parameter
 				command.Parameters.AddWithValue("@time", item.Time.TotalSeconds); // add the value for the 'time' parameter
 				
 				command.Prepare(); // prepare command for the execution
@@ -117,18 +114,18 @@ namespace WebApiMetricsAgent.Repositories
 			}
 		}
 
-		public void UpdateItem(RamMetric item)
+		public void UpdateItem(HddMetric item)
 		{
 			using (var connection = new SQLiteConnection(CONNECTION_STRING))	
 			{
 				connection.Open();
 
 				using var command = new SQLiteCommand(connection) {
-					CommandText = $"UPDATE {TABLE_NAME} SET memoryAvailable = @memoryAvailable, time = @time WHERE id = @id"
+					CommandText = $"UPDATE {TABLE_NAME} SET spaceLeft = @spaceLeft, time = @time WHERE id = @id"
 				};
 
 				command.Parameters.AddWithValue("@id", item.Id);
-				command.Parameters.AddWithValue("@memoryAvailable", item.MemoryAvailable);
+				command.Parameters.AddWithValue("@spaceLeft", item.SpaceLeft);
 				command.Parameters.AddWithValue("@time", item.Time.TotalSeconds);
 				
 				command.Prepare();
@@ -152,6 +149,5 @@ namespace WebApiMetricsAgent.Repositories
 				command.ExecuteNonQuery();
 			}
 		}
-
 	}
 }

@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace WebApiMetricsAgent.Models.Entities
+namespace WebApiMetricsAgent.DTO.Entities
 {
-	public class RamMetric
+	public class RamMetricDto
 	{
 		public int Id { get; set; }
 		public int MemoryAvailable { get; set; }

@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using WebApiMetricsAgent.Models.DTO;
-using WebApiMetricsAgent.Models.Entities;
-using WebApiMetricsAgent.Models.Responses;
-using WebApiMetricsAgent.Repositories;
+using WebApiMetricsAgent.DAL.Interfaces;
+using WebApiMetricsAgent.DAL.Models;
+using WebApiMetricsAgent.DAL.Repositories;
+using WebApiMetricsAgent.DTO.Entities;
+using WebApiMetricsAgent.DTO.Responses;
 
 namespace WebApiMetricsAgent.Controllers
 {

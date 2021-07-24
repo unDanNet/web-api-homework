@@ -1,22 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
-using WebApiMetricsAgent.Interfaces;
-using WebApiMetricsAgent.Models.Entities;
+using WebApiMetricsAgent.DAL.Interfaces;
+using WebApiMetricsAgent.DAL.Models;
 
-namespace WebApiMetricsAgent.Repositories
+namespace WebApiMetricsAgent.DAL.Repositories
 {
-	public interface IHddMetricsRepository : IRepository<HddMetric> {}
-	
-	
-	public class HddMetricsRepository : IHddMetricsRepository
+	public class CpuMetricsRepository : ICpuMetricsRepository
 	{
 		private const string CONNECTION_STRING = "Data Source=metrics.db;Version=3;Pooling=true;Max Pool Size=100";
-		private const string TABLE_NAME = "hddmetrics";
+		private const string TABLE_NAME = "cpumetrics";
 		
-		public IList<HddMetric> GetAllItems()
+		public IList<CpuMetric> GetAllItems()
 		{
-			var result = new List<HddMetric>();
+			var result = new List<CpuMetric>();
 			
 			// open the connection to the database
 			using (var connection = new SQLiteConnection(CONNECTION_STRING))
@@ -33,9 +30,9 @@ namespace WebApiMetricsAgent.Repositories
 				{
 					while (reader.Read())
 					{
-						result.Add(new HddMetric{
+						result.Add(new CpuMetric{
 							Id = reader.GetInt32(0),
-							SpaceLeft = reader.GetInt32(1),
+							Value = reader.GetInt32(1),
 							Time = TimeSpan.FromSeconds(reader.GetInt32(2))
 						});
 					}
@@ -45,7 +42,7 @@ namespace WebApiMetricsAgent.Repositories
 			return result;
 		}
 
-		public HddMetric GetItemById(int id)
+		public CpuMetric GetItemById(int id)
 		{
 			using (var connection = new SQLiteConnection(CONNECTION_STRING))
 			{
@@ -59,18 +56,18 @@ namespace WebApiMetricsAgent.Repositories
 
 				using (SQLiteDataReader reader = command.ExecuteReader())
 				{
-					return reader.Read() ? new HddMetric {
+					return reader.Read() ? new CpuMetric {
 						Id = reader.GetInt32(0), 
-						SpaceLeft = reader.GetInt32(1), 
+						Value = reader.GetInt32(1), 
 						Time = TimeSpan.FromSeconds(reader.GetInt32(2))
 					} : null;
 				}
 			}
 		}
 
-		public IList<HddMetric> GetItemsByTimePeriod(TimeSpan fromTime, TimeSpan toTime)
+		public IList<CpuMetric> GetItemsByTimePeriod(TimeSpan fromTime, TimeSpan toTime)
 		{
-			var result = new List<HddMetric>();
+			var result = new List<CpuMetric>();
 			
 			using (var connection = new SQLiteConnection(CONNECTION_STRING))
 			{
@@ -87,9 +84,9 @@ namespace WebApiMetricsAgent.Repositories
 				{
 					while (reader.Read())
 					{
-						result.Add(new HddMetric {
-							Id = reader.GetInt32(0),
-							SpaceLeft = reader.GetInt32(1),
+						result.Add(new CpuMetric {
+							Id = reader.GetInt32(0), 
+							Value = reader.GetInt32(1), 
 							Time = TimeSpan.FromSeconds(reader.GetInt32(2))
 						});
 					}
@@ -99,17 +96,17 @@ namespace WebApiMetricsAgent.Repositories
 			return result;
 		}
 
-		public void AddItem(HddMetric item)
+		public void AddItem(CpuMetric item)
 		{
 			using (var connection = new SQLiteConnection(CONNECTION_STRING))
 			{
 				connection.Open();
 
 				using var command = new SQLiteCommand(connection) {
-					CommandText = $"INSERT INTO {TABLE_NAME}(spaceLeft, time) VALUES(@spaceLeft, @time)"
+					CommandText = $"INSERT INTO {TABLE_NAME}(value, time) VALUES(@value, @time)"
 				};
 				
-				command.Parameters.AddWithValue("@spaceLeft", item.SpaceLeft); // add the value for the 'spaceLeft' parameter
+				command.Parameters.AddWithValue("@value", item.Value); // add the value for the 'value' parameter
 				command.Parameters.AddWithValue("@time", item.Time.TotalSeconds); // add the value for the 'time' parameter
 				
 				command.Prepare(); // prepare command for the execution
@@ -117,18 +114,18 @@ namespace WebApiMetricsAgent.Repositories
 			}
 		}
 
-		public void UpdateItem(HddMetric item)
+		public void UpdateItem(CpuMetric item)
 		{
 			using (var connection = new SQLiteConnection(CONNECTION_STRING))	
 			{
 				connection.Open();
 
 				using var command = new SQLiteCommand(connection) {
-					CommandText = $"UPDATE {TABLE_NAME} SET spaceLeft = @spaceLeft, time = @time WHERE id = @id"
+					CommandText = $"UPDATE {TABLE_NAME} SET value = @value, time = @time WHERE id = @id"
 				};
 
 				command.Parameters.AddWithValue("@id", item.Id);
-				command.Parameters.AddWithValue("@spaceLeft", item.SpaceLeft);
+				command.Parameters.AddWithValue("@value", item.Value);
 				command.Parameters.AddWithValue("@time", item.Time.TotalSeconds);
 				
 				command.Prepare();
