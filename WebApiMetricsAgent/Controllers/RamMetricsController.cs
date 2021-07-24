@@ -1,4 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using WebApiMetricsAgent.Models.DTO;
+using WebApiMetricsAgent.Models.Entities;
+using WebApiMetricsAgent.Models.Responses;
+using WebApiMetricsAgent.Repositories;
 
 namespace WebApiMetricsAgent.Controllers
 {
@@ -6,10 +13,34 @@ namespace WebApiMetricsAgent.Controllers
 	[Route("api/metrics/ram")]
 	public class RamMetricsController : ControllerBase
 	{
-		[HttpGet("available")]
-		public IActionResult GetAvailableRamLeft()
+		private readonly ILogger<RamMetricsController> _logger;
+		private readonly IRamMetricsRepository _ramMetricsRepository;
+
+		public RamMetricsController(ILogger<RamMetricsController> logger, IRamMetricsRepository ramMetricsRepository)
 		{
-			return Ok();
+			_logger = logger;
+			_ramMetricsRepository = ramMetricsRepository;
+		}
+		
+		[HttpGet("available/from/{fromTime}/to/{toTime}")]
+		public IActionResult GetAvailableRamLeft([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
+		{
+			_logger.LogInformation($"Arguments taken: {nameof(fromTime)} = {fromTime}, {nameof(toTime)} = {toTime}");
+			
+			var metrics = _ramMetricsRepository.GetItemsByTimePeriod(fromTime, toTime) ?? new List<RamMetric>();
+			
+			var response = new AllRamMetricsResponses { Metrics = new List<RamMetricDto>() };
+
+			foreach (var metric in metrics)
+			{
+				response.Metrics.Add(new RamMetricDto {
+					Time = metric.Time,
+					Id = metric.Id,
+					MemoryAvailable = metric.MemoryAvailable
+				});
+			}
+			
+			return Ok(response);
 		}
 	}
 }
