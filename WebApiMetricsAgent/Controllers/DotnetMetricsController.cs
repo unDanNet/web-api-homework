@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using WebApiMetricsAgent.DAL.Interfaces;
@@ -16,11 +17,16 @@ namespace WebApiMetricsAgent.Controllers
 	{
 		private readonly ILogger<DotnetMetricsController> _logger;
 		private readonly IDotnetMetricsRepository _dotnetMetricsRepository;
+		private readonly IMapper _mapper;
 
-		public DotnetMetricsController(ILogger<DotnetMetricsController> logger, IDotnetMetricsRepository dotnetMetricsRepository)
-		{
+		public DotnetMetricsController (
+			ILogger<DotnetMetricsController> logger, 
+			IDotnetMetricsRepository dotnetMetricsRepository,
+			IMapper mapper
+		) {
 			_logger = logger;
 			_dotnetMetricsRepository = dotnetMetricsRepository;
+			_mapper = mapper;
 		}
 		
 		[HttpGet("errors-count/from/{fromTime}/to/{toTime}")]
@@ -32,13 +38,9 @@ namespace WebApiMetricsAgent.Controllers
 			
 			var response = new AllDotnetMetricResponses {Metrics = new List<DotnetMetricDto>()};
 
-			foreach (var metric in metrics)
+			foreach (DotnetMetric metric in metrics)
 			{
-				response.Metrics.Add(new DotnetMetricDto {
-					Id = metric.Id,
-					ErrorsCount = metric.ErrorsCount,
-					Time = metric.Time
-				});
+				response.Metrics.Add(_mapper.Map<DotnetMetricDto>(metric));
 			}
 			
 			return Ok(response);

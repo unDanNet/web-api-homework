@@ -1,153 +1,89 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
+using System.Linq;
+using Dapper;
 using WebApiMetricsAgent.DAL.Interfaces;
 using WebApiMetricsAgent.DAL.Models;
+using WebApiMetricsAgent.DAL.TypeHandlers;
 
 namespace WebApiMetricsAgent.DAL.Repositories
 {
 	public class RamMetricsRepository : IRamMetricsRepository
 	{
 		private const string CONNECTION_STRING = "Data Source=metrics.db;Version=3;Pooling=true;Max Pool Size=100";
-		private const string TABLE_NAME = "cpumetrics";
-		
+		private const string TABLE_NAME = "rammetrics";
+
+		public RamMetricsRepository()
+		{
+			SqlMapper.AddTypeHandler(new TimeSpanHandler());
+		}
+
 		public IList<RamMetric> GetAllItems()
 		{
-			var result = new List<RamMetric>();
-			
-			// open the connection to the database
-			using (var connection = new SQLiteConnection(CONNECTION_STRING))
-			{
-				connection.Open();
+			using var connection = new SQLiteConnection(CONNECTION_STRING);
 
-				// create the command that will be sent to the database
-				using var command = new SQLiteCommand(connection) {
-					CommandText = $"SELECT * FROM {TABLE_NAME}"
-				}; 
-				
-				// start reading the data from the table
-				using (SQLiteDataReader reader = command.ExecuteReader())
-				{
-					while (reader.Read())
-					{
-						result.Add(new RamMetric{
-							Id = reader.GetInt32(0),
-							MemoryAvailable = reader.GetInt32(1),
-							Time = TimeSpan.FromSeconds(reader.GetInt32(2))
-						});
-					}
-				}
-			}
-			
-			return result;
+			return connection.Query<RamMetric>($"SELECT Id, MemoryAvailable, Time FROM {TABLE_NAME}").ToList();
 		}
 
 		public RamMetric GetItemById(int id)
 		{
-			using (var connection = new SQLiteConnection(CONNECTION_STRING))
-			{
-				connection.Open();
-				
-				using var command = new SQLiteCommand(connection) {
-					CommandText = $"SELECT * FROM {TABLE_NAME} WHERE id = @id",
-				};
+			using var connection = new SQLiteConnection(CONNECTION_STRING);
 
-				command.Parameters.AddWithValue("@id", id);
-
-				using (SQLiteDataReader reader = command.ExecuteReader())
-				{
-					return reader.Read() ? new RamMetric {
-						Id = reader.GetInt32(0), 
-						MemoryAvailable = reader.GetInt32(1), 
-						Time = TimeSpan.FromSeconds(reader.GetInt32(2))
-					} : null;
-				}
-			}
+			return connection.QuerySingle<RamMetric>(
+				$"SELECT Id, MemoryAvailable, Time FROM {TABLE_NAME} WHERE id = @id",
+				new {id}
+			);
 		}
 
 		public IList<RamMetric> GetItemsByTimePeriod(TimeSpan fromTime, TimeSpan toTime)
 		{
-			var result = new List<RamMetric>();
-			
-			using (var connection = new SQLiteConnection(CONNECTION_STRING))
-			{
-				connection.Open();
-				
-				using var command = new SQLiteCommand(connection) {
-					CommandText = $"SELECT * FROM {TABLE_NAME} WHERE time >= @fromTime AND time <= @toTime"
-				};
+			using var connection = new SQLiteConnection(CONNECTION_STRING);
 
-				command.Parameters.AddWithValue("@fromTime", fromTime.TotalSeconds);
-				command.Parameters.AddWithValue("@toTime", toTime.TotalSeconds);
-
-				using (SQLiteDataReader reader = command.ExecuteReader())
-				{
-					while (reader.Read())
-					{
-						result.Add(new RamMetric {
-							Id = reader.GetInt32(0), 
-							MemoryAvailable = reader.GetInt32(1), 
-							Time = TimeSpan.FromSeconds(reader.GetInt32(2))
-						});
-					}
+			return connection.Query<RamMetric>(
+				$"SELECT Id, MemoryAvailable, Time FROM {TABLE_NAME} WHERE time >= @fromTime AND time <= @toTime",
+				new {
+					fromTime = fromTime.TotalSeconds, 
+					toTime = toTime.TotalSeconds
 				}
-			}
-
-			return result;
+			).ToList();
 		}
 
 		public void AddItem(RamMetric item)
 		{
-			using (var connection = new SQLiteConnection(CONNECTION_STRING))
-			{
-				connection.Open();
+			using var connection = new SQLiteConnection(CONNECTION_STRING);
 
-				using var command = new SQLiteCommand(connection) {
-					CommandText = $"INSERT INTO {TABLE_NAME}(memoryAvailable, time) VALUES(@memoryAvailable, @time)"
-				};
-				
-				command.Parameters.AddWithValue("@memoryAvailable", item.MemoryAvailable); // add the value for the 'memoryAvailable' parameter
-				command.Parameters.AddWithValue("@time", item.Time.TotalSeconds); // add the value for the 'time' parameter
-				
-				command.Prepare(); // prepare command for the execution
-				command.ExecuteNonQuery(); // execute the command
-			}
+			connection.Execute(
+				$"INSERT INTO {TABLE_NAME}(memoryAvailable, time) VALUES(@memoryAvailable, @time)",
+				new {
+					memoryAvailable = item.MemoryAvailable,
+					time = item.Time.TotalSeconds
+				}
+			);
 		}
 
 		public void UpdateItem(RamMetric item)
 		{
-			using (var connection = new SQLiteConnection(CONNECTION_STRING))	
-			{
-				connection.Open();
+			using var connection = new SQLiteConnection(CONNECTION_STRING);
 
-				using var command = new SQLiteCommand(connection) {
-					CommandText = $"UPDATE {TABLE_NAME} SET memoryAvailable = @memoryAvailable, time = @time WHERE id = @id"
-				};
-
-				command.Parameters.AddWithValue("@id", item.Id);
-				command.Parameters.AddWithValue("@memoryAvailable", item.MemoryAvailable);
-				command.Parameters.AddWithValue("@time", item.Time.TotalSeconds);
-				
-				command.Prepare();
-				command.ExecuteNonQuery();
-			}
+			connection.Execute(
+				$"UPDATE {TABLE_NAME} SET memoryAvailable = @memoryAvailable, time = @time WHERE id = @id",
+				new {
+					memoryAvailable = item.MemoryAvailable,
+					time = item.Time.TotalSeconds,
+					id = item.Id
+				}
+			);
 		}
 
 		public void DeleteItem(int itemId)
 		{
-			using (var connection = new SQLiteConnection(CONNECTION_STRING))
-			{
-				connection.Open();
+			using var connection = new SQLiteConnection(CONNECTION_STRING);
 
-				using var command = new SQLiteCommand(connection) {
-					CommandText = $"DELETE FROM {TABLE_NAME} WHERE id = @id"
-				};
-
-				command.Parameters.AddWithValue("@id", itemId);
-				
-				command.Prepare();
-				command.ExecuteNonQuery();
-			}
+			connection.Execute(
+				$"DELETE FROM {TABLE_NAME} WHERE id = @id",
+				new {id = itemId}
+			);
 		}
 
 	}

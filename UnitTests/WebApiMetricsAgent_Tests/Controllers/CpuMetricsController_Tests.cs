@@ -1,8 +1,10 @@
 ﻿using System;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Microsoft.Extensions.Logging;
 using NUnit.Framework;
+using WebApiMetricsAgent;
 using WebApiMetricsAgent.Controllers;
 using WebApiMetricsAgent.DAL.Interfaces;
 using WebApiMetricsAgent.DAL.Repositories;
@@ -21,8 +23,9 @@ namespace UnitTests.WebApiMetricsAgent_Tests.Controllers
 		{
 			repositoryMock = new Mock<ICpuMetricsRepository>();
 			loggerMock = new Mock<ILogger<CpuMetricsController>>();
+			var mapper = new MapperConfiguration(mp => mp.AddProfile(new MapperProfile())).CreateMapper();
 			
-			controller = new CpuMetricsController(loggerMock.Object, repositoryMock.Object);
+			controller = new CpuMetricsController(loggerMock.Object, repositoryMock.Object, mapper);
 		}
 
 
