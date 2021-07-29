@@ -26,6 +26,7 @@ namespace lesson_1
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddSingleton<WeatherStore>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
