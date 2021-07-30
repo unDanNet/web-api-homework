@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Linq;
+using AutoMapper.Configuration;
+using Core.Extensions;
 using Dapper;
+using Microsoft.Extensions.Configuration;
 using WebApiMetricsAgent.DAL.Interfaces;
 using WebApiMetricsAgent.DAL.Models;
 using WebApiMetricsAgent.DAL.TypeHandlers;
@@ -11,37 +14,40 @@ namespace WebApiMetricsAgent.DAL.Repositories
 {
 	public class RamMetricsRepository : IRamMetricsRepository
 	{
-		private const string CONNECTION_STRING = "Data Source=metrics.db;Version=3;Pooling=true;Max Pool Size=100";
-		private const string TABLE_NAME = "rammetrics";
+		private readonly string connectionString;
+		private readonly string tableName;
 
-		public RamMetricsRepository()
+		public RamMetricsRepository(IConfigurationRoot dbConfig)
 		{
 			SqlMapper.AddTypeHandler(new TimeSpanHandler());
+
+			tableName = dbConfig.GetFullTableName("Ram");
+			connectionString = dbConfig.GetConnectionString("DefaultConnection");
 		}
 
 		public IList<RamMetric> GetAllItems()
 		{
-			using var connection = new SQLiteConnection(CONNECTION_STRING);
+			using var connection = new SQLiteConnection(connectionString);
 
-			return connection.Query<RamMetric>($"SELECT Id, MemoryAvailable, Time FROM {TABLE_NAME}").ToList();
+			return connection.Query<RamMetric>($"SELECT Id, MemoryAvailable, Time FROM {tableName}").ToList();
 		}
 
 		public RamMetric GetItemById(int id)
 		{
-			using var connection = new SQLiteConnection(CONNECTION_STRING);
+			using var connection = new SQLiteConnection(connectionString);
 
 			return connection.QuerySingle<RamMetric>(
-				$"SELECT Id, MemoryAvailable, Time FROM {TABLE_NAME} WHERE id = @id",
+				$"SELECT Id, MemoryAvailable, Time FROM {tableName} WHERE id = @id",
 				new {id}
 			);
 		}
 
 		public IList<RamMetric> GetItemsByTimePeriod(TimeSpan fromTime, TimeSpan toTime)
 		{
-			using var connection = new SQLiteConnection(CONNECTION_STRING);
+			using var connection = new SQLiteConnection(connectionString);
 
 			return connection.Query<RamMetric>(
-				$"SELECT Id, MemoryAvailable, Time FROM {TABLE_NAME} WHERE time >= @fromTime AND time <= @toTime",
+				$"SELECT Id, MemoryAvailable, Time FROM {tableName} WHERE time >= @fromTime AND time <= @toTime",
 				new {
 					fromTime = fromTime.TotalSeconds, 
 					toTime = toTime.TotalSeconds
@@ -51,10 +57,10 @@ namespace WebApiMetricsAgent.DAL.Repositories
 
 		public void AddItem(RamMetric item)
 		{
-			using var connection = new SQLiteConnection(CONNECTION_STRING);
+			using var connection = new SQLiteConnection(connectionString);
 
 			connection.Execute(
-				$"INSERT INTO {TABLE_NAME}(memoryAvailable, time) VALUES(@memoryAvailable, @time)",
+				$"INSERT INTO {tableName}(memoryAvailable, time) VALUES(@memoryAvailable, @time)",
 				new {
 					memoryAvailable = item.MemoryAvailable,
 					time = item.Time.TotalSeconds
@@ -64,10 +70,10 @@ namespace WebApiMetricsAgent.DAL.Repositories
 
 		public void UpdateItem(RamMetric item)
 		{
-			using var connection = new SQLiteConnection(CONNECTION_STRING);
+			using var connection = new SQLiteConnection(connectionString);
 
 			connection.Execute(
-				$"UPDATE {TABLE_NAME} SET memoryAvailable = @memoryAvailable, time = @time WHERE id = @id",
+				$"UPDATE {tableName} SET memoryAvailable = @memoryAvailable, time = @time WHERE id = @id",
 				new {
 					memoryAvailable = item.MemoryAvailable,
 					time = item.Time.TotalSeconds,
@@ -78,10 +84,10 @@ namespace WebApiMetricsAgent.DAL.Repositories
 
 		public void DeleteItem(int itemId)
 		{
-			using var connection = new SQLiteConnection(CONNECTION_STRING);
+			using var connection = new SQLiteConnection(connectionString);
 
 			connection.Execute(
-				$"DELETE FROM {TABLE_NAME} WHERE id = @id",
+				$"DELETE FROM {tableName} WHERE id = @id",
 				new {id = itemId}
 			);
 		}
