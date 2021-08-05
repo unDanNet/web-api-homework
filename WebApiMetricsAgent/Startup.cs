@@ -13,8 +13,13 @@ using Microsoft.Extensions.Logging;
 using System.Data.SQLite;
 using AutoMapper;
 using FluentMigrator.Runner;
+using Quartz;
+using Quartz.Impl;
+using Quartz.Spi;
 using WebApiMetricsAgent.DAL.Interfaces;
 using WebApiMetricsAgent.DAL.Repositories;
+using WebApiMetricsAgent.Jobs;
+using WebApiMetricsAgent.Jobs.Utils;
 
 namespace WebApiMetricsAgent
 {
@@ -39,19 +44,56 @@ namespace WebApiMetricsAgent
 				new MapperConfiguration(mp => mp.AddProfile(new MapperProfile())).CreateMapper()
 			);
 				
-			services.AddScoped<ICpuMetricsRepository, CpuMetricsRepository>();
-			services.AddScoped<IDotnetMetricsRepository, DotnetMetricsRepository>();
-			services.AddScoped<IRamMetricsRepository, RamMetricsRepository>();
-			services.AddScoped<IHddMetricsRepository, HddMetricsRepository>();
-			services.AddScoped<INetworkMetricsRepository, NetworkMetricsRepository>();
+			services.AddSingleton<ICpuMetricsRepository, CpuMetricsRepository>();
+			services.AddSingleton<IDotnetMetricsRepository, DotnetMetricsRepository>();
+			services.AddSingleton<IRamMetricsRepository, RamMetricsRepository>();
+			services.AddSingleton<IHddMetricsRepository, HddMetricsRepository>();
+			services.AddSingleton<INetworkMetricsRepository, NetworkMetricsRepository>();
 
 			services.AddSingleton(_dbConfig);
+
+			
+			services.AddSingleton<IJobFactory, JobFactory>();
+			services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
+
+			services.AddSingleton<CpuMetricJob>();
+			services.AddSingleton(new JobSchedule(
+				jobType: typeof(CpuMetricJob),
+				cronExpression: "0/5 * * * * ?"
+			));
+			
+			services.AddSingleton<RamMetricJob>();
+			services.AddSingleton(new JobSchedule(
+				jobType: typeof(RamMetricJob),
+				cronExpression: "0/5 * * * * ?"
+			));
+			
+			services.AddSingleton<HddMetricJob>();
+			services.AddSingleton(new JobSchedule(
+				jobType: typeof(HddMetricJob),
+				cronExpression: "0/5 * * * * ?"
+			));
+			
+			services.AddSingleton<NetworkMetricJob>();
+			services.AddSingleton(new JobSchedule(
+				jobType: typeof(NetworkMetricJob),
+				cronExpression: "0/5 * * * * ?"
+			));
+			
+			services.AddSingleton<DotnetMetricJob>();
+			services.AddSingleton(new JobSchedule(
+				jobType: typeof(DotnetMetricJob),
+				cronExpression: "0/5 * * * * ?"
+			));
+			
 			
 			services.AddFluentMigratorCore().ConfigureRunner(rb =>
 				rb.AddSQLite()
 					.WithGlobalConnectionString(_dbConfig.GetConnectionString("DefaultConnection"))
 					.ScanIn(typeof(Startup).Assembly).For.Migrations()
 			).AddLogging(lb => lb.AddFluentMigratorConsole());
+
+			services.AddHostedService<QuartzHostedService>();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
