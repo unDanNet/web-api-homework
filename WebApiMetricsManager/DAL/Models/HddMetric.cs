@@ -1,11 +1,12 @@
 ﻿using System;
 
-namespace WebApiMetricsAgent.DTO.Entities
+namespace WebApiMetricsManager.DAL.Models
 {
-	public class HddMetricDto
+	public class HddMetric
 	{
 		public int Id { get; set; }
 		public int SpaceLeft { get; set; }
 		public TimeSpan Time { get; set; }
+		public int AgentId { get; set; }
 	}
 }

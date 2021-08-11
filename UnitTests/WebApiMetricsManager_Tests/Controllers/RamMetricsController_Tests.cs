@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 using WebApiMetricsManager.Controllers;
+using WebApiMetricsManager.DAL.Interfaces;
 
 namespace UnitTests.WebApiMetricsManager_Tests.Controllers
 {
@@ -12,13 +13,15 @@ namespace UnitTests.WebApiMetricsManager_Tests.Controllers
 	{
 		private RamMetricsController controller;
 		private Mock<ILogger<RamMetricsController>> mock;
+		private Mock<IRamMetricsRepository> ramMock;
 	
 		[SetUp]
 		public void Setup()
 		{
 			mock = new Mock<ILogger<RamMetricsController>>();
+			ramMock = new Mock<IRamMetricsRepository>();
 			
-			controller = new RamMetricsController(mock.Object);
+			controller = new RamMetricsController(mock.Object, ramMock.Object);
 		}
 	
 		[Test]

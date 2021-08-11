@@ -1,11 +1,12 @@
 ﻿using System;
 
-namespace WebApiMetricsAgent.DTO.Entities
+namespace WebApiMetricsManager.DAL.Models
 {
-	public class RamMetricDto
+	public class RamMetric
 	{
 		public int Id { get; set; }
 		public int MemoryAvailable { get; set; }
 		public TimeSpan Time { get; set; }
+		public int AgentId { get; set; }
 	}
 }

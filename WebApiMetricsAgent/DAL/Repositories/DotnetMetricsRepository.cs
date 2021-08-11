@@ -91,5 +91,14 @@ namespace WebApiMetricsAgent.DAL.Repositories
 				new {id = itemId}
 			);
 		}
+		
+		public bool IsEmpty()
+		{
+			using var connection = new SQLiteConnection(connectionString);
+
+			var itemsAmount = connection.QuerySingle<int>($"SELECT COUNT(*) FROM {tableName}");
+
+			return itemsAmount == 0;
+		}
 	}
 }

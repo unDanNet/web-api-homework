@@ -1,10 +1,10 @@
 ﻿using System;
 
-namespace WebApiMetricsManager.Models
+namespace WebApiMetricsManager.DAL.Models
 {
 	public class AgentInfo
 	{
 		public int Id { get; set; }
-		public Uri Address { get; set; }
+		public Uri Url { get; set; }
 	}
 }

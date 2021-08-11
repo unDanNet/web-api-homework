@@ -4,7 +4,8 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 using WebApiMetricsManager.Controllers;
-using WebApiMetricsManager.Models;
+using WebApiMetricsManager.DAL.Interfaces;
+using WebApiMetricsManager.DAL.Models;
 
 namespace UnitTests.WebApiMetricsManager_Tests.Controllers
 {
@@ -13,13 +14,15 @@ namespace UnitTests.WebApiMetricsManager_Tests.Controllers
 	{
 		private AgentsController controller;
 		private Mock<ILogger<AgentsController>> mock;
+		private Mock<IAgentsRepository> agentsMock;
 	
 		[SetUp]
 		public void Setup()
 		{
 			mock = new Mock<ILogger<AgentsController>>();
+			agentsMock = new Mock<IAgentsRepository>();
 			
-			controller = new AgentsController(mock.Object);
+			controller = new AgentsController(mock.Object, agentsMock.Object);
 		}
 	
 		[Test]
@@ -35,7 +38,7 @@ namespace UnitTests.WebApiMetricsManager_Tests.Controllers
 		{
 			var agentInfo = new AgentInfo {
 				Id = 1,
-				Address = new Uri("https://sample.uri")
+				Url = new Uri("https://sample.uri")
 			};
 	
 			var result = controller.RegisterAgent(agentInfo);
