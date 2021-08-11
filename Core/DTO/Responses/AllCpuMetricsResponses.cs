@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using WebApiMetricsAgent.DTO.Entities;
+using Core.DTO.Entities;
 
-namespace WebApiMetricsAgent.DTO.Responses
+namespace Core.DTO.Responses
 {
 	public class AllCpuMetricsResponses
 	{

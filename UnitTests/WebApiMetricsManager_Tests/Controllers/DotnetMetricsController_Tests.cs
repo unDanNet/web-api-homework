@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 using WebApiMetricsManager.Controllers;
+using WebApiMetricsManager.DAL.Interfaces;
 
 namespace UnitTests.WebApiMetricsManager_Tests.Controllers
 {
@@ -11,13 +12,15 @@ namespace UnitTests.WebApiMetricsManager_Tests.Controllers
 	{
 		private DotNetMetricsController controller;
 		private Mock<ILogger<DotNetMetricsController>> mock;
+		private Mock<IDotnetMetricsRepository> dotnetMock;
 	
 		[SetUp]
 		public void Setup()
 		{
 			mock = new Mock<ILogger<DotNetMetricsController>>();
+			dotnetMock = new Mock<IDotnetMetricsRepository>();
 			
-			controller = new DotNetMetricsController(mock.Object);
+			controller = new DotNetMetricsController(mock.Object, dotnetMock.Object);
 		}
 	
 		[Test]

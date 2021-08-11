@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
+using WebApiMetricsManager.DAL.Interfaces;
 using WebApiMetricsManager.Controllers;
 
 namespace UnitTests.WebApiMetricsManager_Tests.Controllers
@@ -12,13 +13,15 @@ namespace UnitTests.WebApiMetricsManager_Tests.Controllers
 	{
 		private CpuMetricsController controller;
 		private Mock<ILogger<CpuMetricsController>> mock;
+		private Mock<ICpuMetricsRepository> cpuMock;
 	
 		[SetUp]
 		public void Setup()
 		{
 			mock = new Mock<ILogger<CpuMetricsController>>();
+			cpuMock = new Mock<ICpuMetricsRepository>();
 			
-			controller = new CpuMetricsController(mock.Object);
+			controller = new CpuMetricsController(mock.Object, cpuMock.Object);
 		}
 	
 		[Test]

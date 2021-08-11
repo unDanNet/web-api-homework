@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using AutoMapper;
+using Core.DTO.Entities;
+using Core.DTO.Responses;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using WebApiMetricsAgent.DAL.Interfaces;
 using WebApiMetricsAgent.DAL.Models;
-using WebApiMetricsAgent.DAL.Repositories;
-using WebApiMetricsAgent.DTO.Entities;
-using WebApiMetricsAgent.DTO.Responses;
 
 namespace WebApiMetricsAgent.Controllers
 {
@@ -36,7 +35,7 @@ namespace WebApiMetricsAgent.Controllers
 
 			var metrics = _dotnetMetricsRepository.GetItemsByTimePeriod(fromTime, toTime) ?? new List<DotnetMetric>();
 			
-			var response = new AllDotnetMetricResponses {Metrics = new List<DotnetMetricDto>()};
+			var response = new AllDotnetMetricsResponses {Metrics = new List<DotnetMetricDto>()};
 
 			foreach (DotnetMetric metric in metrics)
 			{

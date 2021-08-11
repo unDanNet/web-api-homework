@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace WebApiMetricsAgent.DTO.Entities
+namespace Core.DTO.Entities
 {
 	public class HddMetricDto
 	{

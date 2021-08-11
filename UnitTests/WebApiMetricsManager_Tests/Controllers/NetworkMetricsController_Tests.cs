@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
+using WebApiMetricsManager.DAL.Interfaces;
 using WebApiMetricsManager.Controllers;
 
 namespace UnitTests.WebApiMetricsManager_Tests.Controllers
@@ -12,13 +13,15 @@ namespace UnitTests.WebApiMetricsManager_Tests.Controllers
 	{
 		private NetworkMetricsController controller;
 		private Mock<ILogger<NetworkMetricsController>> mock;
+		private Mock<INetworkMetricsRepository> networkMock;
 	
 		[SetUp]
 		public void Setup()
 		{
 			mock = new Mock<ILogger<NetworkMetricsController>>();
+			networkMock = new Mock<INetworkMetricsRepository>();
 			
-			controller = new NetworkMetricsController(mock.Object);
+			controller = new NetworkMetricsController(mock.Object, networkMock.Object);
 		}
 	
 		[Test]
