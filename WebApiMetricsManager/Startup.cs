@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Configuration.Internal;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using FluentMigrator.Runner;
 using Microsoft.AspNetCore.Builder;
@@ -12,11 +14,15 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.OpenApi.Models;
+using MyNamespace;
 using Polly;
 using Quartz;
 using Quartz.Impl;
 using Quartz.Spi;
+using Swashbuckle.AspNetCore.SwaggerGen;
 using WebApiMetricsManager.Client;
+using WebApiMetricsManager.Client.SwaggerClient;
 using WebApiMetricsManager.DAL.Interfaces;
 using WebApiMetricsManager.DAL.Repositories;
 using WebApiMetricsManager.Jobs;
@@ -95,6 +101,30 @@ namespace WebApiMetricsManager
 					_ => TimeSpan.FromMilliseconds(1000)
 				)
 			);
+
+			services.AddHttpClient<IMetricsAgentSwaggerClient, MetricsAgentSwaggerClient>().AddTransientHttpErrorPolicy(
+				p => p.WaitAndRetryAsync(
+					3,
+					_ => TimeSpan.FromMilliseconds(1000)
+				)
+			);
+
+			services.AddSwaggerGen(sa => {
+				sa.SwaggerDoc("v1", new OpenApiInfo {
+					Version = "v1",
+					Title = "API сервиса менеджера сбора метрик",
+					Description = "Здесь можно ознакомиться с API сервиса.",
+					Contact = new OpenApiContact {
+						Name = "Daniil",
+						Email = "elgoogecaf@gmail.com"
+					}
+				});
+
+				var xmlFileName = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+				var xmlFilePath = Path.Combine(AppContext.BaseDirectory, xmlFileName);
+
+				sa.IncludeXmlComments(xmlFilePath);
+			});
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -112,6 +142,13 @@ namespace WebApiMetricsManager
 			app.UseAuthorization();
 
 			app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+
+			app.UseSwagger();
+
+			app.UseSwaggerUI(op => {
+				op.SwaggerEndpoint("/swagger/v1/swagger.json", "API сервиса менеджера сбора метрик");
+				op.RoutePrefix = string.Empty;
+			});
 			
 			migrationRunner.MigrateUp();
 		}

@@ -104,7 +104,12 @@ public class RamMetricsRepository : IRamMetricsRepository
 
 		public TimeSpan GetTimeOfLatestMetricByAgentId(int agentId)
 		{
-			throw new NotImplementedException();
+			using var connection = new SQLiteConnection(connectionString);
+
+			return connection.QuerySingle<TimeSpan>(
+				$"SELECT MAX(Time) FROM {tableName} WHERE agentId = @agentId",
+				new {agentId}
+			);
 		}
 	}
 }

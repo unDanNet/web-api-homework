@@ -20,6 +20,17 @@ namespace WebApiMetricsManager.Controllers
 			_repository = repository;
 		}
 		
+		
+		/// <summary>
+		/// Get all registered agents in the system.
+		/// </summary>
+		/// <remarks>
+		/// Request example:
+		///
+		///		GET api/agents/list
+		/// 
+		/// </remarks>
+		/// <returns>The list of all registered agents.</returns>
 		[HttpGet("list")]
 		public IActionResult GetRegisteredAgents()
 		{
@@ -30,6 +41,17 @@ namespace WebApiMetricsManager.Controllers
 			return Ok(result);
 		}
 		
+		
+		/// <summary>
+		/// Register a new agent to gather metrics.
+		/// </summary>
+		/// <remarks>
+		/// Request example:
+		///
+		///		POST api/agents/register?url=localhost:5000
+		/// 
+		/// </remarks>
+		/// <returns>The list of all registered agents.</returns>
 		[HttpPost("register")]
 		public IActionResult RegisterAgent([FromBody] AgentInfo agentInfo)
 		{
@@ -40,6 +62,7 @@ namespace WebApiMetricsManager.Controllers
 			return Ok();
 		}
 
+		
 		[HttpPut("enable/{agentId}")]
 		public IActionResult EnableAgentById([FromRoute] int agentId)
 		{
