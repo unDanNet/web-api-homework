@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using WebApiMetricsAgent.Interfaces;
-using WebApiMetricsAgent.Models.DTO;
-using WebApiMetricsAgent.Models.Entities;
-using WebApiMetricsAgent.Models.Responses;
-using WebApiMetricsAgent.Repositories;
+using WebApiMetricsAgent.DAL.Interfaces;
+using WebApiMetricsAgent.DAL.Models;
+using WebApiMetricsAgent.DAL.Repositories;
+using WebApiMetricsAgent.DTO.Entities;
+using WebApiMetricsAgent.DTO.Responses;
 
 namespace WebApiMetricsAgent.Controllers
 {
@@ -16,11 +17,13 @@ namespace WebApiMetricsAgent.Controllers
 	{
 		private readonly ILogger<CpuMetricsController> _logger;
 		private readonly ICpuMetricsRepository _cpuMetricsRepository;
+		private readonly IMapper _mapper;
 
-		public CpuMetricsController(ILogger<CpuMetricsController> logger, ICpuMetricsRepository cpuMetricsRepository)
+		public CpuMetricsController(ILogger<CpuMetricsController> logger, ICpuMetricsRepository cpuMetricsRepository, IMapper mapper)
 		{
 			_logger = logger;
 			_cpuMetricsRepository = cpuMetricsRepository;
+			_mapper = mapper;
 		}
 
 
@@ -33,13 +36,9 @@ namespace WebApiMetricsAgent.Controllers
 			
 			var response = new AllCpuMetricsResponses { Metrics = new List<CpuMetricDto>() };
 
-			foreach (var metric in metrics)
+			foreach (CpuMetric metric in metrics)
 			{
-				response.Metrics.Add(new CpuMetricDto {
-					Time = metric.Time,
-					Id = metric.Id,
-					Value = metric.Value
-				});
+				response.Metrics.Add(_mapper.Map<CpuMetricDto>(metric));
 			}
 			
 			return Ok(response);

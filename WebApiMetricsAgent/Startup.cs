@@ -11,8 +11,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.Data.SQLite;
-using WebApiMetricsAgent.Interfaces;
-using WebApiMetricsAgent.Repositories;
+using AutoMapper;
+using WebApiMetricsAgent.DAL.Interfaces;
+using WebApiMetricsAgent.DAL.Repositories;
 
 namespace WebApiMetricsAgent
 {
@@ -30,6 +31,10 @@ namespace WebApiMetricsAgent
 		{
 			services.AddControllers();
 
+			services.AddSingleton(
+				new MapperConfiguration(mp => mp.AddProfile(new MapperProfile())).CreateMapper()
+			);
+				
 			services.AddScoped<ICpuMetricsRepository, CpuMetricsRepository>();
 			services.AddScoped<IDotnetMetricsRepository, DotnetMetricsRepository>();
 			services.AddScoped<IRamMetricsRepository, RamMetricsRepository>();

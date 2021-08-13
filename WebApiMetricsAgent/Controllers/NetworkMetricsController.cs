@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using WebApiMetricsAgent.Models.DTO;
-using WebApiMetricsAgent.Models.Entities;
-using WebApiMetricsAgent.Models.Responses;
-using WebApiMetricsAgent.Repositories;
+using WebApiMetricsAgent.DAL.Interfaces;
+using WebApiMetricsAgent.DAL.Models;
+using WebApiMetricsAgent.DAL.Repositories;
+using WebApiMetricsAgent.DTO.Entities;
+using WebApiMetricsAgent.DTO.Responses;
 
 namespace WebApiMetricsAgent.Controllers
 {
@@ -15,11 +17,16 @@ namespace WebApiMetricsAgent.Controllers
 	{
 		private readonly ILogger<NetworkMetricsController> _logger;
 		private readonly INetworkMetricsRepository _networkMetricsRepository;
+		private readonly IMapper _mapper;
 
-		public NetworkMetricsController(ILogger<NetworkMetricsController> logger, INetworkMetricsRepository networkMetricsRepository)
-		{
+		public NetworkMetricsController(
+			ILogger<NetworkMetricsController> logger,
+			INetworkMetricsRepository networkMetricsRepository, 
+			IMapper mapper
+		) {
 			_logger = logger;
 			_networkMetricsRepository = networkMetricsRepository;
+			_mapper = mapper;
 		}
 		
 		[HttpGet("from/{fromTime}/to/{toTime}")]
@@ -31,13 +38,9 @@ namespace WebApiMetricsAgent.Controllers
 			
 			var response = new AllNetworkMetricsResponses {Metrics = new List<NetworkMetricDto>()};
 
-			foreach (var metric in metrics)
+			foreach (NetworkMetric metric in metrics)
 			{
-				response.Metrics.Add(new NetworkMetricDto {
-					Id = metric.Id,
-					Value = metric.Value,
-					Time = metric.Time
-				});
+				response.Metrics.Add(_mapper.Map<NetworkMetricDto>(metric));
 			}
 			
 			return Ok(response);

@@ -1,10 +1,13 @@
 ﻿using System;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
+using WebApiMetricsAgent;
 using WebApiMetricsAgent.Controllers;
-using WebApiMetricsAgent.Repositories;
+using WebApiMetricsAgent.DAL.Interfaces;
+using WebApiMetricsAgent.DAL.Repositories;
 
 namespace UnitTests.WebApiMetricsAgent_Tests.Controllers
 {
@@ -20,8 +23,9 @@ namespace UnitTests.WebApiMetricsAgent_Tests.Controllers
 		{
 			repositoryMock = new Mock<INetworkMetricsRepository>();
 			loggerMock = new Mock<ILogger<NetworkMetricsController>>();
+			var mapper = new MapperConfiguration(mp => mp.AddProfile(new MapperProfile())).CreateMapper();
 			
-			controller = new NetworkMetricsController(loggerMock.Object, repositoryMock.Object);
+			controller = new NetworkMetricsController(loggerMock.Object, repositoryMock.Object, mapper);
 		}
 
 		[Test]

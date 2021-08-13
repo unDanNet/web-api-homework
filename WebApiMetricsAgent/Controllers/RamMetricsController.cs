@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using WebApiMetricsAgent.Models.DTO;
-using WebApiMetricsAgent.Models.Entities;
-using WebApiMetricsAgent.Models.Responses;
-using WebApiMetricsAgent.Repositories;
+using WebApiMetricsAgent.DAL.Interfaces;
+using WebApiMetricsAgent.DAL.Models;
+using WebApiMetricsAgent.DAL.Repositories;
+using WebApiMetricsAgent.DTO.Entities;
+using WebApiMetricsAgent.DTO.Responses;
 
 namespace WebApiMetricsAgent.Controllers
 {
@@ -15,11 +17,13 @@ namespace WebApiMetricsAgent.Controllers
 	{
 		private readonly ILogger<RamMetricsController> _logger;
 		private readonly IRamMetricsRepository _ramMetricsRepository;
+		private readonly IMapper _mapper;
 
-		public RamMetricsController(ILogger<RamMetricsController> logger, IRamMetricsRepository ramMetricsRepository)
+		public RamMetricsController(ILogger<RamMetricsController> logger, IRamMetricsRepository ramMetricsRepository, IMapper mapper)
 		{
 			_logger = logger;
 			_ramMetricsRepository = ramMetricsRepository;
+			_mapper = mapper;
 		}
 		
 		[HttpGet("available/from/{fromTime}/to/{toTime}")]
@@ -31,13 +35,9 @@ namespace WebApiMetricsAgent.Controllers
 			
 			var response = new AllRamMetricsResponses { Metrics = new List<RamMetricDto>() };
 
-			foreach (var metric in metrics)
+			foreach (RamMetric metric in metrics)
 			{
-				response.Metrics.Add(new RamMetricDto {
-					Time = metric.Time,
-					Id = metric.Id,
-					MemoryAvailable = metric.MemoryAvailable
-				});
+				response.Metrics.Add(_mapper.Map<RamMetricDto>(metric));
 			}
 			
 			return Ok(response);
