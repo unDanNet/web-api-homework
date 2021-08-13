@@ -1,6 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Moq;
 using NUnit.Framework;
 using WebApiMetricsAgent.Controllers;
+using WebApiMetricsAgent.Repositories;
 
 namespace UnitTests.WebApiMetricsAgent_Tests.Controllers
 {
@@ -8,17 +12,40 @@ namespace UnitTests.WebApiMetricsAgent_Tests.Controllers
 	public class RamMetricsController_Tests
 	{
 		private RamMetricsController controller;
-
+		private Mock<IRamMetricsRepository> repositoryMock;
+		private Mock<ILogger<RamMetricsController>> loggerMock;
+	
 		[SetUp]
 		public void Setup()
 		{
-			controller = new RamMetricsController();
+			repositoryMock = new Mock<IRamMetricsRepository>();
+			loggerMock = new Mock<ILogger<RamMetricsController>>();
+			
+			controller = new RamMetricsController(loggerMock.Object, repositoryMock.Object);
 		}
 
 		[Test]
-		public void GetAvailableRamLeft()
+		public void GetAvailableRamLeft__ShouldCall_GetItemsByTimePeriod_From_Repository()
 		{
-			var result = controller.GetAvailableRamLeft();
+			repositoryMock.Setup(
+				repository => repository.GetItemsByTimePeriod(It.IsAny<TimeSpan>(), It.IsAny<TimeSpan>())
+			).Verifiable();
+
+			var result = controller.GetAvailableRamLeft(TimeSpan.FromSeconds(0), TimeSpan.FromSeconds(50));
+			
+			repositoryMock.Verify(
+				repository => repository.GetItemsByTimePeriod(It.IsAny<TimeSpan>(), It.IsAny<TimeSpan>()),
+				Times.AtMostOnce
+			);
+		}
+	
+		[Test]
+		public void GetAvailableRamLeft__ReturnsOk()
+		{
+			var fromTime = TimeSpan.FromSeconds(0);
+			var toTime = TimeSpan.FromSeconds(100);
+			
+			var result = controller.GetAvailableRamLeft(fromTime, toTime);
 			
 			Assert.IsInstanceOf<IActionResult>(result);
 		}

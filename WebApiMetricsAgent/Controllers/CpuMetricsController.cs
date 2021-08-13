@@ -1,5 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using WebApiMetricsAgent.Interfaces;
+using WebApiMetricsAgent.Models.DTO;
+using WebApiMetricsAgent.Models.Entities;
+using WebApiMetricsAgent.Models.Responses;
+using WebApiMetricsAgent.Repositories;
 
 namespace WebApiMetricsAgent.Controllers
 {
@@ -7,17 +14,35 @@ namespace WebApiMetricsAgent.Controllers
 	[Route("api/metrics/cpu")]
 	public class CpuMetricsController : ControllerBase
 	{
-		[HttpGet("from/{fromTime}/to/{toTime}/percentiles/{percentile}")]
-		public IActionResult GetMetricsForTimePeriod([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime, [FromRoute] int percentile)
+		private readonly ILogger<CpuMetricsController> _logger;
+		private readonly ICpuMetricsRepository _cpuMetricsRepository;
+
+		public CpuMetricsController(ILogger<CpuMetricsController> logger, ICpuMetricsRepository cpuMetricsRepository)
 		{
-			return Ok();
+			_logger = logger;
+			_cpuMetricsRepository = cpuMetricsRepository;
 		}
 
 
 		[HttpGet("from/{fromTime}/to/{toTime}")]
-		public IActionResult GetMetricsForTimePeriod([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
+		public IActionResult GetMetrics([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
 		{
-			return Ok();
+			_logger.LogInformation($"Arguments taken: {nameof(fromTime)} = {fromTime}, {nameof(toTime)} = {toTime}");
+			
+			var metrics = _cpuMetricsRepository.GetItemsByTimePeriod(fromTime, toTime) ?? new List<CpuMetric>();
+			
+			var response = new AllCpuMetricsResponses { Metrics = new List<CpuMetricDto>() };
+
+			foreach (var metric in metrics)
+			{
+				response.Metrics.Add(new CpuMetricDto {
+					Time = metric.Time,
+					Id = metric.Id,
+					Value = metric.Value
+				});
+			}
+			
+			return Ok(response);
 		}
 	}
 }

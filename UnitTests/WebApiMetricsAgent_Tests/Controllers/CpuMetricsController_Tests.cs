@@ -1,7 +1,10 @@
 ﻿using System;
 using Microsoft.AspNetCore.Mvc;
+using Moq;
+using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 using WebApiMetricsAgent.Controllers;
+using WebApiMetricsAgent.Repositories;
 
 namespace UnitTests.WebApiMetricsAgent_Tests.Controllers
 {
@@ -9,33 +12,42 @@ namespace UnitTests.WebApiMetricsAgent_Tests.Controllers
 	public class CpuMetricsController_Tests
 	{
 		private CpuMetricsController controller;
+		private Mock<ICpuMetricsRepository> repositoryMock;
+		private Mock<ILogger<CpuMetricsController>> loggerMock;
 		
 		[SetUp]
 		public void Setup()
 		{
-			controller = new CpuMetricsController();
+			repositoryMock = new Mock<ICpuMetricsRepository>();
+			loggerMock = new Mock<ILogger<CpuMetricsController>>();
+			
+			controller = new CpuMetricsController(loggerMock.Object, repositoryMock.Object);
 		}
 
+
+		[Test]
+		public void GetMetrics__ShouldCall_GetItemsByTimePeriod_From_Repository()
+		{
+			repositoryMock.Setup(
+				repository => repository.GetItemsByTimePeriod(It.IsAny<TimeSpan>(), It.IsAny<TimeSpan>())
+			).Verifiable();
+
+			var result = controller.GetMetrics(TimeSpan.FromSeconds(0), TimeSpan.FromSeconds(50));
+			
+			repositoryMock.Verify(
+				repository => repository.GetItemsByTimePeriod(It.IsAny<TimeSpan>(), It.IsAny<TimeSpan>()),
+				Times.AtMostOnce
+			);
+		}
 		
-		[Test]
-		public void GetMetricsForTimePeriod_WithPercentiles_ReturnsOk()
-		{
-			var fromTime = TimeSpan.FromSeconds(0);
-			var toTime = TimeSpan.FromSeconds(100);
-			var percentile = 50;
-			
-			var result = controller.GetMetricsForTimePeriod(fromTime, toTime, percentile);
-			
-			Assert.IsInstanceOf<IActionResult>(result);
-		}
 
 		[Test]
-		public void GetMetricsForTimePeriod_ReturnsOk()
+		public void GetMetrics__ReturnsOk()
 		{
 			var fromTime = TimeSpan.FromSeconds(0);
 			var toTime = TimeSpan.FromSeconds(100);
 
-			var result = controller.GetMetricsForTimePeriod(fromTime, toTime);
+			var result = controller.GetMetrics(fromTime, toTime);
 			
 			Assert.IsInstanceOf<IActionResult>(result);
 		}
