@@ -59,8 +59,9 @@ public class HddMetricsRepository : IHddMetricsRepository
 			using var connection = new SQLiteConnection(connectionString);
 
 			connection.Execute(
-				$"INSERT INTO {tableName}(spaceLeft, time) VALUES(@spaceLeft, @time)",
+				$"INSERT INTO {tableName}(agentId, spaceLeft, time) VALUES(@agentId, @spaceLeft, @time)",
 				new {
+					agentId = item.AgentId,
 					spaceLeft = item.SpaceLeft,
 					time = item.Time.TotalSeconds
 				}
@@ -72,8 +73,9 @@ public class HddMetricsRepository : IHddMetricsRepository
 			using var connection = new SQLiteConnection(connectionString);
 
 			connection.Execute(
-				$"UPDATE {tableName} SET spaceLeft = @spaceLeft, time = @time WHERE id = @id",
+				$"UPDATE {tableName} SET agentId = @agentId, spaceLeft = @spaceLeft, time = @time WHERE id = @id",
 				new {
+					agentId = item.AgentId,
 					spaceLeft = item.SpaceLeft,
 					time = item.Time.TotalSeconds,
 					id = item.Id
@@ -98,7 +100,11 @@ public class HddMetricsRepository : IHddMetricsRepository
 			return connection.Query<HddMetric>(
 				$"SELECT Id, SpaceLeft, Time, AgentId FROM {tableName} " +
 					"WHERE agentId = @agentId AND time >= @fromTime AND time <= @toTime",
-				new {agentId, fromTime, toTime}
+				new {
+					agentId, 
+					fromTime = fromTime.TotalSeconds, 
+					toTime = toTime.TotalSeconds
+				}
 			).ToList();
 		}
 
@@ -106,6 +112,11 @@ public class HddMetricsRepository : IHddMetricsRepository
 		{
 			using var connection = new SQLiteConnection(connectionString);
 
+			if (!GetAllItems().Any())
+			{
+				return new TimeSpan();
+			}
+			
 			return connection.QuerySingle<TimeSpan>(
 				$"SELECT MAX(Time) FROM {tableName} WHERE agentId = @agentId",
 				new {agentId}

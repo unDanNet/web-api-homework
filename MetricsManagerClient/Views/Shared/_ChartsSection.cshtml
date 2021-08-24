@@ -1,0 +1,28 @@
+﻿@model string
+
+<div class="@Model-dashboard section">
+    <h2 class="section__title">@Model.ToUpper()</h2>
+    <div class="@Model-dashboard__form inline-form">
+        <h3 class="inline-form__title">Select the agent:</h3>
+        <span class="inline-form__wrapper dropdown-wrapper">
+            <button class="inline-form__dropdown dropdown button">None selected</button>
+            <div class="dropdown-list hidden">
+                      
+            </div>
+        </span>
+    </div>
+    <div class="@Model-dashboard__chart chart-wrapper">
+        <div class="chart-wrapper__chart-locker">
+            <div>No agent selected</div>
+        </div>
+        <div class="chart-wrapper__chart">
+          
+        </div>
+        <div class="chart-wrapper__chart-control inline-form">
+            <h3 class="chart-control__title inline-form__title">Select the time period:</h3>
+            <input type="datetime-local" class="chart-control__start-time inline-form__input-field">
+            <input type="datetime-local" class="chart-control__end-time inline-form__input-field">
+            <button class="chart-control__submit-btn button inline-form__submit-btn">show</button>
+        </div>
+    </div>
+</div>

@@ -56,6 +56,8 @@ namespace WebApiMetricsManager
 			services.AddSingleton<INetworkMetricsRepository, NetworkMetricsRepository>();
 			services.AddSingleton<IRamMetricsRepository, RamMetricsRepository>();
 			
+			services.AddHostedService<QuartzHostedService>();
+			
 			services.AddSingleton<IJobFactory, JobFactory>();
 			services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
 			

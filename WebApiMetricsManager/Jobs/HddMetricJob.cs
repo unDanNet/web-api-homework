@@ -10,7 +10,7 @@ using WebApiMetricsManager.DTO.Requests;
 
 namespace WebApiMetricsManager.Jobs
 {
-	public class HddMetricJob
+	public class HddMetricJob : IJob
 	{
 		private readonly IAgentsRepository _agentsRepo;
 		private readonly IHddMetricsRepository _hddMetricsRepo;
@@ -29,8 +29,12 @@ namespace WebApiMetricsManager.Jobs
 
 			foreach (var agent in agents)
 			{
+				if (!agent.Enabled) {
+					continue;
+				}
+				
 				TimeSpan fromTime = _hddMetricsRepo.GetTimeOfLatestMetricByAgentId(agent.Id);
-				TimeSpan toTime = TimeSpan.FromSeconds(DateTime.UtcNow.Second);
+				TimeSpan toTime = TimeSpan.FromSeconds(DateTimeOffset.UtcNow.ToUnixTimeSeconds());
 
 				AllHddMetricsResponses metricsFromAgent = _client.GetAllHddMetrics(new GetAllHddMetricsApiRequest {
 					FromTime = fromTime,

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json;
 using Core.DTO.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -46,7 +47,7 @@ namespace WebApiMetricsManager.Controllers
 
 			IList<DotnetMetric> result = _repository.GetItemsByAgentId(agentId, fromTime, toTime);
 			
-			return Ok(result);
+			return Ok(JsonSerializer.Serialize(result));
 		}
 
 
@@ -71,7 +72,7 @@ namespace WebApiMetricsManager.Controllers
 
 			IList<DotnetMetric> result = _repository.GetItemsByTimePeriod(fromTime, toTime);
 			
-			return Ok(result);
+			return Ok(JsonSerializer.Serialize(result));
 		}
 	}
 }

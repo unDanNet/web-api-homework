@@ -15,7 +15,11 @@ namespace WebApiMetricsAgent.Jobs
 		public NetworkMetricJob(INetworkMetricsRepository repository)
 		{
 			_repository = repository;
-			_networkCounter = new PerformanceCounter("Network Interface", "Packets/sec");
+			_networkCounter = new PerformanceCounter(
+				"Network Interface",
+				"Packets/sec", 
+				"Realtek PCIe GbE Family Controller"
+			);
 		}
 		
 		public Task Execute(IJobExecutionContext context)

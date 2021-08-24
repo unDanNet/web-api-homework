@@ -10,7 +10,7 @@ using WebApiMetricsManager.DTO.Requests;
 
 namespace WebApiMetricsManager.Jobs
 {
-	public class RamMetricJob
+	public class RamMetricJob : IJob
 	{
 		private readonly IAgentsRepository _agentsRepo;
 		private readonly IRamMetricsRepository _ramMetricsRepo;
@@ -29,8 +29,12 @@ namespace WebApiMetricsManager.Jobs
 
 			foreach (var agent in agents)
 			{
+				if (!agent.Enabled) {
+					continue;
+				}
+				
 				TimeSpan fromTime = _ramMetricsRepo.GetTimeOfLatestMetricByAgentId(agent.Id);
-				TimeSpan toTime = TimeSpan.FromSeconds(DateTime.UtcNow.Second);
+				TimeSpan toTime = TimeSpan.FromSeconds(DateTimeOffset.UtcNow.ToUnixTimeSeconds());
 
 				AllRamMetricsResponses metricsFromAgent = _client.GetAllRamMetrics(new GetAllRamMetricsApiRequest {
 					FromTime = fromTime,

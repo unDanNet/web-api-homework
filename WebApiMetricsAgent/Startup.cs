@@ -55,6 +55,7 @@ namespace WebApiMetricsAgent
 
 			services.AddSingleton(_dbConfig);
 
+			services.AddHostedService<QuartzHostedService>();
 			
 			services.AddSingleton<IJobFactory, JobFactory>();
 			services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
@@ -95,8 +96,6 @@ namespace WebApiMetricsAgent
 					.WithGlobalConnectionString(_dbConfig.GetConnectionString("DefaultConnection"))
 					.ScanIn(typeof(Startup).Assembly).For.Migrations()
 			).AddLogging(lb => lb.AddFluentMigratorConsole());
-
-			services.AddHostedService<QuartzHostedService>();
 
 			services.AddSwaggerGen(sa => {
 				sa.SwaggerDoc("v1", new OpenApiInfo {

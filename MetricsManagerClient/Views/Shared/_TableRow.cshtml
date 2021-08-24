@@ -1,0 +1,16 @@
+﻿@model MetricsManagerClient.Models.AgentInfo
+
+<tr class="table-row @(Model.Enabled ? "agent-enabled" : "agent-disabled")">
+    <td>
+        @Model.Id
+    </td>
+    <td>
+        @Model.Url
+    </td>
+    <td>
+        <input id="agent@(Model.Id)" class="agents-table__checkbox" type="checkbox" data-agentId="@Model.Id" @(Model.Enabled ? "checked" : "")>
+        <label class="agents-table__label" for="agent@(Model.Id)">
+            <span>@(Model.Enabled ? "Enabled" : "Disabled")</span>
+        </label>
+    </td>
+</tr>

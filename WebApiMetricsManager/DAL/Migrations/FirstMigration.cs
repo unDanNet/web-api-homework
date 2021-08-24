@@ -47,7 +47,8 @@ namespace WebApiMetricsManager.DAL.Migrations
 
 			Create.Table(_tables["Agents"])
 				.WithColumn("Id").AsInt64().PrimaryKey().Identity()
-				.WithColumn("Url").AsString();
+				.WithColumn("Url").AsString()
+				.WithColumn("Enabled").AsBoolean();
 		}
 
 		public override void Down()

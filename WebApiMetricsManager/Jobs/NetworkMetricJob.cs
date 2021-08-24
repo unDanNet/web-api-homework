@@ -10,7 +10,7 @@ using WebApiMetricsManager.DTO.Requests;
 
 namespace WebApiMetricsManager.Jobs
 {
-	public class NetworkMetricJob
+	public class NetworkMetricJob : IJob
 	{
 		private readonly IAgentsRepository _agentsRepo;
 		private readonly INetworkMetricsRepository _networkMetricsRepo;
@@ -29,8 +29,12 @@ namespace WebApiMetricsManager.Jobs
 
 			foreach (var agent in agents)
 			{
+				if (!agent.Enabled) {
+					continue;
+				}
+				
 				TimeSpan fromTime = _networkMetricsRepo.GetTimeOfLatestMetricByAgentId(agent.Id);
-				TimeSpan toTime = TimeSpan.FromSeconds(DateTime.UtcNow.Second);
+				TimeSpan toTime = TimeSpan.FromSeconds(DateTimeOffset.UtcNow.ToUnixTimeSeconds());
 
 				AllNetworkMetricsResponses metricsFromAgent = _client.GetAllNetworkMetrics(new GetAllNetworkMetricsApiRequest {
 					FromTime = fromTime,

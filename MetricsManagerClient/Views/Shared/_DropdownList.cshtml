@@ -1,0 +1,16 @@
+﻿@model IEnumerable<MetricsManagerClient.Models.AgentInfo>
+
+@{
+    foreach (var agent in Model)
+    {
+        if (agent.Enabled)
+        {
+            <div class="dropdown-list__option" data-agent-id="@agent.Id" data-agent-url="@agent.Url">
+                <span>@agent.Id:</span>
+                <span>@agent.Url</span>
+            </div>
+        }
+    }
+}
+
+

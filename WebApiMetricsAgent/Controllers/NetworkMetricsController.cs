@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json;
 using AutoMapper;
 using Core.DTO.Entities;
 using Core.DTO.Responses;
@@ -57,7 +58,7 @@ namespace WebApiMetricsAgent.Controllers
 				response.Metrics.Add(_mapper.Map<NetworkMetricDto>(metric));
 			}
 			
-			return Ok(response);
+			return Ok(JsonSerializer.Serialize(response));
 		}
 	}
 }

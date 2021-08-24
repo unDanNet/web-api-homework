@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using WebApiMetricsManager.Client;
 using WebApiMetricsManager.DAL.Interfaces;
 using WebApiMetricsManager.DAL.Models;
 using WebApiMetricsManager.DTO.Requests;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace WebApiMetricsManager.Controllers
 {
@@ -45,7 +47,7 @@ namespace WebApiMetricsManager.Controllers
 
 			IList<NetworkMetric> result = _repository.GetItemsByAgentId(agentId, fromTime, toTime);
 			
-			return Ok(result);
+			return Ok(JsonSerializer.Serialize(result));
 		}
 
 
@@ -70,7 +72,7 @@ namespace WebApiMetricsManager.Controllers
 
 			IList<NetworkMetric> result = _repository.GetItemsByTimePeriod(fromTime, toTime);
 			
-			return Ok(result);
+			return Ok(JsonSerializer.Serialize(result));
 		}
 	}
 }

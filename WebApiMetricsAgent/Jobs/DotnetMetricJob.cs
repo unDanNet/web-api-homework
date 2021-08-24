@@ -15,7 +15,11 @@ namespace WebApiMetricsAgent.Jobs
 		public DotnetMetricJob(IDotnetMetricsRepository repository)
 		{
 			_repository = repository;
-			_dotnetCounter = new PerformanceCounter("ASP .NET", "Error Events Raised");
+			_dotnetCounter = new PerformanceCounter(
+				"ASP.NET Applications",
+				"Error Events Raised",
+				"__Total__"
+			);
 		}
 		
 		public Task Execute(IJobExecutionContext context)

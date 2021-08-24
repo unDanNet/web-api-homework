@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using WebApiMetricsManager.Client;
@@ -45,7 +46,7 @@ namespace WebApiMetricsManager.Controllers
 
 			IList<RamMetric> result = _repository.GetItemsByAgentId(agentId, fromTime, toTime);
 			
-			return Ok(result);
+			return Ok(JsonSerializer.Serialize(result));
 		}
 
 
@@ -70,7 +71,7 @@ namespace WebApiMetricsManager.Controllers
 
 			IList<RamMetric> result = _repository.GetItemsByTimePeriod(fromTime, toTime);
 			
-			return Ok(result);
+			return Ok(JsonSerializer.Serialize(result));
 		}
 	}
 }

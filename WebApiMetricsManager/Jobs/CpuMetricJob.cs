@@ -29,8 +29,12 @@ namespace WebApiMetricsManager.Jobs
 
 			foreach (var agent in agents)
 			{
+				if (!agent.Enabled) {
+					continue;
+				}
+				
 				TimeSpan fromTime = _cpuMetricsRepo.GetTimeOfLatestMetricByAgentId(agent.Id);
-				TimeSpan toTime = TimeSpan.FromSeconds(DateTime.UtcNow.Second);
+				TimeSpan toTime = TimeSpan.FromSeconds(DateTimeOffset.UtcNow.ToUnixTimeSeconds());
 
 				AllCpuMetricsResponses metricsFromAgent = _client.GetAllCpuMetrics(new GetAllCpuMetricsApiRequest {
 					FromTime = fromTime,

@@ -59,10 +59,11 @@ public class RamMetricsRepository : IRamMetricsRepository
 			using var connection = new SQLiteConnection(connectionString);
 
 			connection.Execute(
-				$"INSERT INTO {tableName}(memoryAvailable, time) VALUES(@memoryAvailable, @time)",
+				$"INSERT INTO {tableName}(agentId, memoryAvailable, time) VALUES(@agentId, @memoryAvailable, @time)",
 				new {
 					memoryAvailable = item.MemoryAvailable,
-					time = item.Time.TotalSeconds
+					time = item.Time.TotalSeconds,
+					agentId = item.AgentId
 				}
 			);
 		}
@@ -72,8 +73,9 @@ public class RamMetricsRepository : IRamMetricsRepository
 			using var connection = new SQLiteConnection(connectionString);
 
 			connection.Execute(
-				$"UPDATE {tableName} SET memoryAvailable = @memoryAvailable, time = @time WHERE id = @id",
+				$"UPDATE {tableName} SET agentId = @agentId, memoryAvailable = @memoryAvailable, time = @time WHERE id = @id",
 				new {
+					agentId = item.AgentId,
 					memoryAvailable = item.MemoryAvailable,
 					time = item.Time.TotalSeconds,
 					id = item.Id
@@ -98,7 +100,11 @@ public class RamMetricsRepository : IRamMetricsRepository
 			return connection.Query<RamMetric>(
 				$"SELECT Id, MemoryAvailable, Time, AgentId FROM {tableName} " +
 					"WHERE agentId = @agentId AND time >= @fromTime AND time <= @toTime",
-				new {agentId, fromTime, toTime}
+				new {
+					agentId, 
+					fromTime = fromTime.TotalSeconds, 
+					toTime = toTime.TotalSeconds
+				}
 			).ToList();
 		}
 
@@ -106,6 +112,11 @@ public class RamMetricsRepository : IRamMetricsRepository
 		{
 			using var connection = new SQLiteConnection(connectionString);
 
+			if (!GetAllItems().Any())
+			{
+				return new TimeSpan();
+			}
+			
 			return connection.QuerySingle<TimeSpan>(
 				$"SELECT MAX(Time) FROM {tableName} WHERE agentId = @agentId",
 				new {agentId}

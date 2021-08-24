@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using WebApiMetricsManager.DAL.Interfaces;
@@ -38,7 +39,7 @@ namespace WebApiMetricsManager.Controllers
 
 			IList<AgentInfo> result = _repository.GetAllItems();
 			
-			return Ok(result);
+			return Ok(JsonSerializer.Serialize(result));
 		}
 		
 		
@@ -53,13 +54,13 @@ namespace WebApiMetricsManager.Controllers
 		/// </remarks>
 		/// <returns>The list of all registered agents.</returns>
 		[HttpPost("register")]
-		public IActionResult RegisterAgent([FromBody] AgentInfo agentInfo)
+		public IActionResult RegisterAgent([FromQuery] AgentInfo agentInfo)
 		{
 			_logger.LogInformation($"Arguments taken: {nameof(agentInfo)} = {agentInfo}");
 			
-			_repository.AddItem(agentInfo);
+			AgentInfo agent = _repository.AddItemAndGetItBack(agentInfo);
 			
-			return Ok();
+			return Ok(JsonSerializer.Serialize(agent));
 		}
 
 		
@@ -68,6 +69,14 @@ namespace WebApiMetricsManager.Controllers
 		{
 			_logger.LogInformation($"Arguments taken: {nameof(agentId)} = {agentId}");
 
+			var agent = _repository.GetItemById(agentId);
+			
+			_repository.UpdateItem(new AgentInfo {
+				Id = agent.Id,
+				Url = agent.Url,
+				Enabled = true
+			});
+			
 			return Ok();
 		}
 
@@ -76,6 +85,14 @@ namespace WebApiMetricsManager.Controllers
 		{
 			_logger.LogInformation($"Arguments taken: {nameof(agentId)} = {agentId}");
 
+			var agent = _repository.GetItemById(agentId);
+			
+			_repository.UpdateItem(new AgentInfo {
+				Id = agent.Id,
+				Url = agent.Url,
+				Enabled = false
+			});
+			
 			return Ok();
 		}
 	}

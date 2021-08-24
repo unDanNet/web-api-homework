@@ -22,12 +22,12 @@ namespace WebApiMetricsManager.Client
 		
 		public AllCpuMetricsResponses GetAllCpuMetrics(GetAllCpuMetricsApiRequest request)
 		{
-			var fromTimeArg = request.FromTime.TotalSeconds;
-			var toTimeArg = request.ToTime.TotalSeconds;
+			var fromTimeArg = request.FromTime;
+			var toTimeArg = request.ToTime;
 
 			var httpRequest = new HttpRequestMessage(
 				HttpMethod.Get, 
-				$"{request.AgentBaseAddress}/api/metrics/cpu/from/{fromTimeArg}/to/{toTimeArg}"
+				$"{request.AgentBaseAddress}api/metrics/cpu/from/{fromTimeArg}/to/{toTimeArg}"
 			);
 
 			try
@@ -49,12 +49,12 @@ namespace WebApiMetricsManager.Client
 
 		public AllRamMetricsResponses GetAllRamMetrics(GetAllRamMetricsApiRequest request)
 		{
-			var fromTimeArg = request.FromTime.TotalSeconds;
-			var toTimeArg = request.ToTime.TotalSeconds;
+			var fromTimeArg = request.FromTime;
+			var toTimeArg = request.ToTime;
 
 			var httpRequest = new HttpRequestMessage(
 				HttpMethod.Get, 
-				$"{request.AgentBaseAddress}/api/metrics/ram/available/from/{fromTimeArg}/to/{toTimeArg}"
+				$"{request.AgentBaseAddress}api/metrics/ram/available/from/{fromTimeArg}/to/{toTimeArg}"
 			);
 
 			try
@@ -76,12 +76,12 @@ namespace WebApiMetricsManager.Client
 
 		public AllHddMetricsResponses GetAllHddMetrics(GetAllHddMetricsApiRequest request)
 		{
-			var fromTimeArg = request.FromTime.TotalSeconds;
-			var toTimeArg = request.ToTime.TotalSeconds;
+			var fromTimeArg = request.FromTime;
+			var toTimeArg = request.ToTime;
 
 			var httpRequest = new HttpRequestMessage(
 				HttpMethod.Get, 
-				$"{request.AgentBaseAddress}/api/metrics/hdd/left/from/{fromTimeArg}/to/{toTimeArg}"
+				$"{request.AgentBaseAddress}api/metrics/hdd/left/from/{fromTimeArg}/to/{toTimeArg}"
 			);
 
 			try
@@ -103,12 +103,12 @@ namespace WebApiMetricsManager.Client
 
 		public AllDotnetMetricsResponses GetAllDotnetMetrics(GetAllDotnetMetricsApiRequest request)
 		{
-			var fromTimeArg = request.FromTime.TotalSeconds;
-			var toTimeArg = request.ToTime.TotalSeconds;
+			var fromTimeArg = request.FromTime;
+			var toTimeArg = request.ToTime;
 
 			var httpRequest = new HttpRequestMessage(
 				HttpMethod.Get, 
-				$"{request.AgentBaseAddress}/api/metrics/dotnet/errors-count/from/{fromTimeArg}/to/{toTimeArg}"
+				$"{request.AgentBaseAddress}api/metrics/dotnet/errors-count/from/{fromTimeArg}/to/{toTimeArg}"
 			);
 
 			try
@@ -130,12 +130,12 @@ namespace WebApiMetricsManager.Client
 
 		public AllNetworkMetricsResponses GetAllNetworkMetrics(GetAllNetworkMetricsApiRequest request)
 		{
-			var fromTimeArg = request.FromTime.TotalSeconds;
-			var toTimeArg = request.ToTime.TotalSeconds;
+			var fromTimeArg = request.FromTime;
+			var toTimeArg = request.ToTime;
 
 			var httpRequest = new HttpRequestMessage(
 				HttpMethod.Get, 
-				$"{request.AgentBaseAddress}/api/metrics/network/from/{fromTimeArg}/to/{toTimeArg}"
+				$"{request.AgentBaseAddress}api/metrics/network/from/{fromTimeArg}/to/{toTimeArg}"
 			);
 
 			try

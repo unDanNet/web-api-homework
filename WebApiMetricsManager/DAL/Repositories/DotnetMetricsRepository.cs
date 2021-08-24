@@ -60,8 +60,9 @@ public class DotnetMetricsRepository : IDotnetMetricsRepository
 			using var connection = new SQLiteConnection(connectionString);
 
 			connection.Execute(
-				$"INSERT INTO {tableName}(errorsCount, time) VALUES(@errorsCount, @time)",
+				$"INSERT INTO {tableName}(agentId, errorsCount, time) VALUES(@agentId, @errorsCount, @time)",
 				new {
+					agentId = item.AgentId,
 					errorsCount = item.ErrorsCount,
 					time = item.Time.TotalSeconds
 				}
@@ -73,8 +74,9 @@ public class DotnetMetricsRepository : IDotnetMetricsRepository
 			using var connection = new SQLiteConnection(connectionString);
 
 			connection.Execute(
-				$"UPDATE {tableName} SET errorsCount = @errorsCount, time = @time WHERE id = @id",
+				$"UPDATE {tableName} SET agentId = @agentId, errorsCount = @errorsCount, time = @time WHERE id = @id",
 				new {
+					agentId = item.AgentId,
 					errorsCount = item.ErrorsCount,
 					time = item.Time.TotalSeconds,
 					id = item.Id
@@ -99,7 +101,11 @@ public class DotnetMetricsRepository : IDotnetMetricsRepository
 			return connection.Query<DotnetMetric>(
 				$"SELECT Id, ErrorsCount, Time, AgentId FROM {tableName} " +
 				"WHERE agentId = @agentId AND time >= @fromTime AND time <= @toTime",
-				new {agentId, fromTime, toTime}
+				new {
+					agentId, 
+					fromTime = fromTime.TotalSeconds, 
+					toTime = toTime.TotalSeconds
+				}
 			).ToList();
 		}
 
@@ -107,6 +113,11 @@ public class DotnetMetricsRepository : IDotnetMetricsRepository
 		{
 			using var connection = new SQLiteConnection(connectionString);
 
+			if (!GetAllItems().Any())
+			{
+				return new TimeSpan();
+			}
+			
 			return connection.QuerySingle<TimeSpan>(
 				$"SELECT MAX(Time) FROM {tableName} WHERE agentId = @agentId",
 				new {agentId}

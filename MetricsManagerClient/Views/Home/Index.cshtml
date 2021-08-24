@@ -1,0 +1,45 @@
+﻿@model IEnumerable<MetricsManagerClient.Models.AgentInfo>
+
+<div class="agents-table section">
+  <h2 class="section__title">Agents</h2>
+  <div class="agents-table__form inline-form">
+    <h3 class="inline-form__title">Add new agent:</h3>
+    <span class="inline-form__wrapper">
+      <input class="inline-form__input-field" type="text" placeholder="Agent base url">
+      <div class="inline-form__error hidden">
+        Agent Url must be non-empty and a valid base url.
+      </div>
+    </span>
+    <button class="inline-form__submit-btn button" type="submit">Add</button>
+  </div>
+  <table>
+    <thead class="table-header">
+    <tr class="table-row">
+      <th>
+        Agent ID
+      </th>
+      <th>
+        Agent URL
+      </th>
+      <th>
+        Agent Status
+      </th>        
+    </tr>
+    </thead>
+    <tbody class="table-body">
+    @{
+      foreach (var agent in Model){
+        @await Html.PartialAsync("_TableRow", agent)
+      }
+    }
+    </tbody>
+  </table>
+</div>
+@await Html.PartialAsync("_ChartsSection", "cpu")
+@await Html.PartialAsync("_ChartsSection", "ram")
+@await Html.PartialAsync("_ChartsSection", "network")
+@await Html.PartialAsync("_ChartsSection", "hdd")
+@await Html.PartialAsync("_ChartsSection", "dotnet")
+
+<script src="~/js/charts.js"></script>
+<script src="~/js/index.js"></script>

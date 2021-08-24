@@ -21,8 +21,8 @@ namespace WebApiMetricsAgent.DAL.Repositories
 		{
 			SqlMapper.AddTypeHandler(new TimeSpanHandler());
 
-			connectionString = dbConfig.GetFullTableName("Network");
-			tableName = dbConfig.GetConnectionString("DefaultConnection");
+			connectionString = dbConfig.GetConnectionString("DefaultConnection");
+			tableName = dbConfig.GetFullTableName("Network");
 		}
 
 		public IList<NetworkMetric> GetAllItems()

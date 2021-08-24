@@ -20,8 +20,8 @@ public class NetworkMetricsRepository : INetworkMetricsRepository
 		{
 			SqlMapper.AddTypeHandler(new TimeSpanHandler());
 
-			connectionString = dbConfig.GetFullTableName("Network");
-			tableName = dbConfig.GetConnectionString("DefaultConnection");
+			connectionString = dbConfig.GetConnectionString("DefaultConnection"); 
+			tableName = dbConfig.GetFullTableName("Network");
 		}
 
 		public IList<NetworkMetric> GetAllItems()
@@ -59,8 +59,9 @@ public class NetworkMetricsRepository : INetworkMetricsRepository
 			using var connection = new SQLiteConnection(connectionString);
 
 			connection.Execute(
-				$"INSERT INTO {tableName}(value, time) VALUES(@value, @time)",
+				$"INSERT INTO {tableName}(agentId, value, time) VALUES(@agentId, @value, @time)",
 				new {
+					agentId = item.AgentId,
 					value = item.Value,
 					time = item.Time.TotalSeconds
 				}
@@ -72,8 +73,9 @@ public class NetworkMetricsRepository : INetworkMetricsRepository
 			using var connection = new SQLiteConnection(connectionString);
 
 			connection.Execute(
-				$"UPDATE {tableName} SET value = @value, time = @time WHERE id = @id",
+				$"UPDATE {tableName} SET agentId = @agentId, value = @value, time = @time WHERE id = @id",
 				new {
+					agentId = item.AgentId,
 					value = item.Value,
 					time = item.Time.TotalSeconds,
 					id = item.Id
@@ -97,7 +99,11 @@ public class NetworkMetricsRepository : INetworkMetricsRepository
 
 			return connection.Query<NetworkMetric>(
 				$"SELECT Id, Value, Time, AgentId FROM {tableName} WHERE agentId = @agentId AND time >= @fromTime AND time <= @toTime",
-				new {agentId, fromTime, toTime}
+				new {
+					agentId, 
+					fromTime = fromTime.TotalSeconds, 
+					toTime = toTime.TotalSeconds
+				}
 			).ToList();
 		}
 
@@ -105,6 +111,11 @@ public class NetworkMetricsRepository : INetworkMetricsRepository
 		{
 			using var connection = new SQLiteConnection(connectionString);
 
+			if (!GetAllItems().Any())
+			{
+				return new TimeSpan();
+			}
+			
 			return connection.QuerySingle<TimeSpan>(
 				$"SELECT MAX(Time) FROM {tableName} WHERE agentId = @agentId",
 				new {agentId}
