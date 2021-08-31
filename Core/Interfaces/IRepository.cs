@@ -16,5 +16,7 @@ namespace Core.Interfaces
 		void UpdateItem(T item);
 		
 		void DeleteItem(int itemId);
+
+		bool IsEmpty();
 	}
 }

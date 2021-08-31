@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 using WebApiMetricsManager.Controllers;
+using WebApiMetricsManager.DAL.Interfaces;
 
 namespace UnitTests.WebApiMetricsManager_Tests.Controllers
 {
@@ -12,13 +13,15 @@ namespace UnitTests.WebApiMetricsManager_Tests.Controllers
 	{
 		private HddMetricsController controller;
 		private Mock<ILogger<HddMetricsController>> mock;
+		private Mock<IHddMetricsRepository> hddMock;
 	
 		[SetUp]
 		public void Setup()
 		{
 			mock = new Mock<ILogger<HddMetricsController>>();
+			hddMock = new Mock<IHddMetricsRepository>();
 			
-			controller = new HddMetricsController(mock.Object);
+			controller = new HddMetricsController(mock.Object, hddMock.Object);
 		}
 	
 		[Test]

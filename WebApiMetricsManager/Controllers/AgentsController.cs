@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using WebApiMetricsManager.Models;
+using WebApiMetricsManager.DAL.Interfaces;
+using WebApiMetricsManager.DAL.Models;
 
 namespace WebApiMetricsManager.Controllers
 {
@@ -10,24 +12,30 @@ namespace WebApiMetricsManager.Controllers
 	public class AgentsController : ControllerBase
 	{
 		private readonly ILogger<AgentsController> _logger;
+		private readonly IAgentsRepository _repository;
 
-		public AgentsController(ILogger<AgentsController> logger)
+		public AgentsController(ILogger<AgentsController> logger, IAgentsRepository repository)
 		{
 			_logger = logger;
+			_repository = repository;
 		}
 		
 		[HttpGet("list")]
 		public IActionResult GetRegisteredAgents()
 		{
 			_logger.LogInformation("No arguments passed");
+
+			IList<AgentInfo> result = _repository.GetAllItems();
 			
-			return Ok();
+			return Ok(result);
 		}
 		
 		[HttpPost("register")]
 		public IActionResult RegisterAgent([FromBody] AgentInfo agentInfo)
 		{
 			_logger.LogInformation($"Arguments taken: {nameof(agentInfo)} = {agentInfo}");
+			
+			_repository.AddItem(agentInfo);
 			
 			return Ok();
 		}
@@ -36,7 +44,7 @@ namespace WebApiMetricsManager.Controllers
 		public IActionResult EnableAgentById([FromRoute] int agentId)
 		{
 			_logger.LogInformation($"Arguments taken: {nameof(agentId)} = {agentId}");
-			
+
 			return Ok();
 		}
 
@@ -44,6 +52,7 @@ namespace WebApiMetricsManager.Controllers
 		public IActionResult DisableAgentById([FromRoute] int agentId)
 		{
 			_logger.LogInformation($"Arguments taken: {nameof(agentId)} = {agentId}");
+
 			return Ok();
 		}
 	}

@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Linq;
+using Core.Extensions;
 using Dapper;
+using Microsoft.Extensions.Configuration;
 using WebApiMetricsAgent.DAL.Interfaces;
 using WebApiMetricsAgent.DAL.Models;
 using WebApiMetricsAgent.DAL.TypeHandlers;
@@ -11,38 +13,41 @@ namespace WebApiMetricsAgent.DAL.Repositories
 {
 	public class DotnetMetricsRepository : IDotnetMetricsRepository
 	{
-		private const string CONNECTION_STRING = "Data Source=metrics.db;Version=3;Pooling=true;Max Pool Size=100";
-		private const string TABLE_NAME = "dotnetmetrics";
+		private readonly string connectionString;
+		private readonly string tableName;
 
-		public DotnetMetricsRepository()
+		public DotnetMetricsRepository(IConfigurationRoot dbConfig)
 		{
 			SqlMapper.AddTypeHandler(new TimeSpanHandler());
+
+			tableName = dbConfig.GetFullTableName("Dotnet");
+			connectionString = dbConfig.GetConnectionString("DefaultConnection");
 		}
 
 
 		public IList<DotnetMetric> GetAllItems()
 		{
-			using var connection = new SQLiteConnection(CONNECTION_STRING);
+			using var connection = new SQLiteConnection(connectionString);
 
-			return connection.Query<DotnetMetric>($"SELECT Id, ErrorsCount, Time FROM {TABLE_NAME}").ToList();
+			return connection.Query<DotnetMetric>($"SELECT Id, ErrorsCount, Time FROM {tableName}").ToList();
 		}
 
 		public DotnetMetric GetItemById(int id)
 		{
-			using var connection = new SQLiteConnection(CONNECTION_STRING);
+			using var connection = new SQLiteConnection(connectionString);
 
 			return connection.QuerySingle<DotnetMetric>(
-				$"SELECT Id, ErrorsCount, Time FROM {TABLE_NAME} WHERE id = @id",
+				$"SELECT Id, ErrorsCount, Time FROM {tableName} WHERE id = @id",
 				new {id}
 			);
 		}
 
 		public IList<DotnetMetric> GetItemsByTimePeriod(TimeSpan fromTime, TimeSpan toTime)
 		{
-			using var connection = new SQLiteConnection(CONNECTION_STRING);
+			using var connection = new SQLiteConnection(connectionString);
 
 			return connection.Query<DotnetMetric>(
-				$"SELECT Id, ErrorsCount, Time FROM {TABLE_NAME} WHERE time >= @fromTime AND time <= @toTime",
+				$"SELECT Id, ErrorsCount, Time FROM {tableName} WHERE time >= @fromTime AND time <= @toTime",
 				new {
 					fromTime = fromTime.TotalSeconds, 
 					toTime = toTime.TotalSeconds
@@ -52,10 +57,10 @@ namespace WebApiMetricsAgent.DAL.Repositories
 
 		public void AddItem(DotnetMetric item)
 		{
-			using var connection = new SQLiteConnection(CONNECTION_STRING);
+			using var connection = new SQLiteConnection(connectionString);
 
 			connection.Execute(
-				$"INSERT INTO {TABLE_NAME}(errorsCount, time) VALUES(@errorsCount, @time)",
+				$"INSERT INTO {tableName}(errorsCount, time) VALUES(@errorsCount, @time)",
 				new {
 					errorsCount = item.ErrorsCount,
 					time = item.Time.TotalSeconds
@@ -65,10 +70,10 @@ namespace WebApiMetricsAgent.DAL.Repositories
 
 		public void UpdateItem(DotnetMetric item)
 		{
-			using var connection = new SQLiteConnection(CONNECTION_STRING);
+			using var connection = new SQLiteConnection(connectionString);
 
 			connection.Execute(
-				$"UPDATE {TABLE_NAME} SET errorsCount = @errorsCount, time = @time WHERE id = @id",
+				$"UPDATE {tableName} SET errorsCount = @errorsCount, time = @time WHERE id = @id",
 				new {
 					errorsCount = item.ErrorsCount,
 					time = item.Time.TotalSeconds,
@@ -79,12 +84,21 @@ namespace WebApiMetricsAgent.DAL.Repositories
 
 		public void DeleteItem(int itemId)
 		{
-			using var connection = new SQLiteConnection(CONNECTION_STRING);
+			using var connection = new SQLiteConnection(connectionString);
 
 			connection.Execute(
-				$"DELETE FROM {TABLE_NAME} WHERE id = @id",
+				$"DELETE FROM {tableName} WHERE id = @id",
 				new {id = itemId}
 			);
+		}
+		
+		public bool IsEmpty()
+		{
+			using var connection = new SQLiteConnection(connectionString);
+
+			var itemsAmount = connection.QuerySingle<int>($"SELECT COUNT(*) FROM {tableName}");
+
+			return itemsAmount == 0;
 		}
 	}
 }

@@ -1,0 +1,13 @@
+﻿{
+  "ConnectionStrings": {
+    "DefaultConnection": "Data Source=metrics.db;Version=3;Pooling=true;Max Pool Size=100"
+  },
+  "TablesNames": {
+    "Cpu": "cpumetrics",
+    "Dotnet": "dotnetmetrics",
+    "Hdd": "hddmetrics",
+    "Network": "networkmetrics",
+    "Ram": "rammetrics",
+    "Agents": "agents"
+  }
+}

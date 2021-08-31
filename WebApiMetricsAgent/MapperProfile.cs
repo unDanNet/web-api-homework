@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
+using Core.DTO.Entities;
 using WebApiMetricsAgent.DAL.Models;
-using WebApiMetricsAgent.DTO.Entities;
 
 namespace WebApiMetricsAgent
 {
