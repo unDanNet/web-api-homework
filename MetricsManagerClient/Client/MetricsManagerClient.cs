@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
+using System.Threading.Tasks;
 using MetricsManagerClient.Models;
 using Microsoft.Extensions.Logging;
 
@@ -20,8 +21,9 @@ namespace MetricsManagerClient.Client
 			_client = client;
 			_logger = logger;
 		}
+		
 
-		public IList<AgentInfo> GetAllRegisteredAgents()
+		public async Task<IList<AgentInfo>> GetAllRegisteredAgentsAsync()
 		{
 			var httpRequest = new HttpRequestMessage(
 				HttpMethod.Get, 
@@ -30,11 +32,11 @@ namespace MetricsManagerClient.Client
 
 			try
 			{
-				HttpResponseMessage response = _client.SendAsync(httpRequest).Result;
+				HttpResponseMessage response = await _client.SendAsync(httpRequest);
 
-				using var responseStream = response.Content.ReadAsStreamAsync().Result;
+				await using var responseStream = await response.Content.ReadAsStreamAsync();
 
-				return JsonSerializer.DeserializeAsync<IList<AgentInfo>>(responseStream).Result;
+				return await JsonSerializer.DeserializeAsync<IList<AgentInfo>>(responseStream);
 			}
 			catch (Exception e)
 			{
@@ -43,20 +45,34 @@ namespace MetricsManagerClient.Client
 			}
 		}
 
-		public AgentInfo RegisterAgent(string agentUrl)
+		public async Task<AgentInfo> RegisterAgentAsync(string agentUrl)
 		{
+
+			try
+			{
+				var testRequest = new HttpRequestMessage(HttpMethod.Get, agentUrl);
+
+				await _client.SendAsync(testRequest);
+			}
+			catch (Exception e)
+			{
+				throw new HttpRequestException("Attempted to add an agent that does not respond to http requests.");
+			}
+			
+			
 			var httpRequest = new HttpRequestMessage(
 				HttpMethod.Post, 
 				$"{managerServerUrl}/agents/register?url={agentUrl}&enabled=true"
 			);
 
+			
 			try
 			{
-				HttpResponseMessage response = _client.SendAsync(httpRequest).Result;
+				HttpResponseMessage response = await _client.SendAsync(httpRequest);
 
-				using var responseStream = response.Content.ReadAsStreamAsync().Result;
+				await using var responseStream = await response.Content.ReadAsStreamAsync();
 				
-				return JsonSerializer.DeserializeAsync<AgentInfo>(responseStream).Result;
+				return await JsonSerializer.DeserializeAsync<AgentInfo>(responseStream);
 			}
 			catch (Exception e)
 			{
@@ -65,7 +81,7 @@ namespace MetricsManagerClient.Client
 			}
 		}
 
-		public void EnableAgent(int agentId)
+		public async Task EnableAgentAsync(int agentId)
 		{
 			var httpRequest = new HttpRequestMessage(
 				HttpMethod.Put, 
@@ -74,7 +90,7 @@ namespace MetricsManagerClient.Client
 
 			try
 			{ 
-				_client.SendAsync(httpRequest);
+				await _client.SendAsync(httpRequest);
 			}
 			catch (Exception e)
 			{
@@ -83,7 +99,7 @@ namespace MetricsManagerClient.Client
 			}
 		}
 
-		public void DisableAgent(int agentId)
+		public async Task DisableAgentAsync(int agentId)
 		{
 			var httpRequest = new HttpRequestMessage(
 				HttpMethod.Put, 
@@ -92,7 +108,7 @@ namespace MetricsManagerClient.Client
 
 			try
 			{
-				_client.SendAsync(httpRequest);
+				await _client.SendAsync(httpRequest);
 			}
 			catch (Exception e)
 			{
@@ -101,7 +117,7 @@ namespace MetricsManagerClient.Client
 			}
 		}
 
-		public T GetLastMetric<T>(string type, int agentId)
+		public async Task<T> GetLastMetricAsync<T>(string type, int agentId)
 		{
 			var toTime = TimeSpan.FromSeconds(DateTimeOffset.UtcNow.ToUnixTimeSeconds());
 			var fromTime = toTime - TimeSpan.FromSeconds(60);
@@ -113,11 +129,11 @@ namespace MetricsManagerClient.Client
 
 			try
 			{
-				var response = _client.SendAsync(httpRequest).Result;
+				var response = await _client.SendAsync(httpRequest);
 
-				using var responseStream = response.Content.ReadAsStreamAsync().Result;
+				await using var responseStream = await response.Content.ReadAsStreamAsync();
 
-				var metrics = JsonSerializer.DeserializeAsync<IList<T>>(responseStream).Result;
+				var metrics = await JsonSerializer.DeserializeAsync<IList<T>>(responseStream);
 				
 				return metrics[^1];
 			}
@@ -128,7 +144,7 @@ namespace MetricsManagerClient.Client
 			}
 		}
 
-		public IList<T> GetMetricsFromSpecifiedTime<T>(string type, int agentId, TimeSpan fromTime)
+		public async Task<IList<T>> GetMetricsFromSpecifiedTimeAsync<T>(string type, int agentId, TimeSpan fromTime)
 		{
 			var toTime = TimeSpan.FromSeconds(DateTimeOffset.UtcNow.ToUnixTimeSeconds());
 			
@@ -139,11 +155,11 @@ namespace MetricsManagerClient.Client
 
 			try
 			{
-				var response = _client.SendAsync(httpRequest).Result;
+				var response = await _client.SendAsync(httpRequest);
 
-				using var responseStream = response.Content.ReadAsStreamAsync().Result;
+				await using var responseStream = await response.Content.ReadAsStreamAsync();
 
-				return JsonSerializer.DeserializeAsync<IList<T>>(responseStream).Result;
+				return await JsonSerializer.DeserializeAsync<IList<T>>(responseStream);
 			}
 			catch (Exception e)
 			{
@@ -152,7 +168,7 @@ namespace MetricsManagerClient.Client
 			}
 		}
 
-		public IList<T> GetMetricsToSpecifiedTime<T>(string type, int agentId, TimeSpan toTime)
+		public async Task<IList<T>> GetMetricsToSpecifiedTimeAsync<T>(string type, int agentId, TimeSpan toTime)
 		{
 			var fromTime = new TimeSpan();
 			
@@ -163,11 +179,11 @@ namespace MetricsManagerClient.Client
 
 			try
 			{
-				var response = _client.SendAsync(httpRequest).Result;
+				var response = await _client.SendAsync(httpRequest);
 
-				using var responseStream = response.Content.ReadAsStreamAsync().Result;
+				await using var responseStream = await response.Content.ReadAsStreamAsync();
 
-				return JsonSerializer.DeserializeAsync<IList<T>>(responseStream).Result;
+				return await JsonSerializer.DeserializeAsync<IList<T>>(responseStream);
 			}
 			catch (Exception e)
 			{
@@ -176,7 +192,7 @@ namespace MetricsManagerClient.Client
 			}
 		}
 
-		public IList<T> GetMetricsInSpecifiedTime<T>(string type, int agentId, TimeSpan fromTime, TimeSpan toTime)
+		public async Task<IList<T>> GetMetricsInSpecifiedTimeAsync<T>(string type, int agentId, TimeSpan fromTime, TimeSpan toTime)
 		{
 			var httpRequest = new HttpRequestMessage(
 				HttpMethod.Get, 
@@ -185,11 +201,11 @@ namespace MetricsManagerClient.Client
 
 			try
 			{
-				var response = _client.SendAsync(httpRequest).Result;
+				var response = await _client.SendAsync(httpRequest);
 
-				using var responseStream = response.Content.ReadAsStreamAsync().Result;
+				await using var responseStream = await response.Content.ReadAsStreamAsync();
 
-				return JsonSerializer.DeserializeAsync<IList<T>>(responseStream).Result;
+				return await JsonSerializer.DeserializeAsync<IList<T>>(responseStream);
 			}
 			catch (Exception e)
 			{

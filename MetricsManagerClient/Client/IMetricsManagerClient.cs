@@ -1,25 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using MetricsManagerClient.Models;
 
 namespace MetricsManagerClient.Client
 {
 	public interface IMetricsManagerClient
 	{
-		public IList<AgentInfo> GetAllRegisteredAgents();
+		public Task<IList<AgentInfo>> GetAllRegisteredAgentsAsync();
 		
-		public AgentInfo RegisterAgent(string agentUrl);
+		public Task<AgentInfo> RegisterAgentAsync(string agentUrl);
 
-		public void EnableAgent(int agentId);
+		public Task EnableAgentAsync(int agentId);
 
-		public void DisableAgent(int agentId);
+		public Task DisableAgentAsync(int agentId);
 
-		public T GetLastMetric<T>(string type, int agentId);
+		public Task<T> GetLastMetricAsync<T>(string type, int agentId);
 
-		public IList<T> GetMetricsFromSpecifiedTime<T>(string type, int agentId, TimeSpan fromTime);
+		public Task<IList<T>> GetMetricsFromSpecifiedTimeAsync<T>(string type, int agentId, TimeSpan fromTime);
 
-		public IList<T> GetMetricsToSpecifiedTime<T>(string type, int agentId, TimeSpan toTime);
+		public Task<IList<T>> GetMetricsToSpecifiedTimeAsync<T>(string type, int agentId, TimeSpan toTime);
 
-		public IList<T> GetMetricsInSpecifiedTime<T>(string type, int agentId, TimeSpan fromTime, TimeSpan toTime);
+		public Task<IList<T>> GetMetricsInSpecifiedTimeAsync<T>(string type, int agentId, TimeSpan fromTime, TimeSpan toTime);
 	}
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using MetricsManagerClient.Client;
 using MetricsManagerClient.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -18,11 +19,11 @@ namespace MetricsManagerClient.Controllers
 		}
 
 		[HttpGet("")]
-		public IActionResult Index()
+		public async Task<IActionResult> Index()
 		{
 			try
 			{
-				IList<AgentInfo> allAgents = _client.GetAllRegisteredAgents();
+				IList<AgentInfo> allAgents = await _client.GetAllRegisteredAgentsAsync();
 				
 				return View(allAgents);
 			}
@@ -33,11 +34,11 @@ namespace MetricsManagerClient.Controllers
 		}
 
 		[HttpPost("add-agent")]
-		public IActionResult AddAgent(string url)
+		public async Task<IActionResult> AddAgent(string url)
 		{
 			try
 			{
-				AgentInfo addedAgent = _client.RegisterAgent(url);
+				AgentInfo addedAgent = await _client.RegisterAgentAsync(url);
 				
 				return PartialView("_TableRow", addedAgent);
 			}
@@ -48,11 +49,11 @@ namespace MetricsManagerClient.Controllers
 		}
 		
 		[HttpPut("enable-agent")]
-		public IActionResult EnableAgent(int id)
+		public async Task<IActionResult> EnableAgent(int id)
 		{
 			try
 			{
-				_client.EnableAgent(id);
+				await _client.EnableAgentAsync(id);
 				return Ok();
 			}
 			catch (Exception e)
@@ -62,11 +63,11 @@ namespace MetricsManagerClient.Controllers
 		}
 		
 		[HttpPut("disable-agent")]
-		public IActionResult DisableAgent(int id)
+		public async Task<IActionResult> DisableAgent(int id)
 		{
 			try
 			{
-				_client.DisableAgent(id);
+				await _client.DisableAgentAsync(id);
 				return Ok();
 			}
 			catch (Exception e)
@@ -76,11 +77,11 @@ namespace MetricsManagerClient.Controllers
 		}
 
 		[HttpPost("get-all-agents")]
-		public IActionResult GetAllAgents()
+		public async Task<IActionResult> GetAllAgents()
 		{
 			try
 			{
-				IList<AgentInfo> allAgents = _client.GetAllRegisteredAgents();
+				IList<AgentInfo> allAgents = await _client.GetAllRegisteredAgentsAsync();
 				
 				return PartialView("_DropdownList", allAgents);
 			}
