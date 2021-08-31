@@ -11,6 +11,9 @@ using WebApiMetricsAgent.DAL.Models;
 
 namespace WebApiMetricsAgent.Controllers
 {
+	/// <summary>
+	/// Controller for gathering CPU metrics.
+	/// </summary>
 	[ApiController]
 	[Route("api/metrics/cpu")]
 	public class CpuMetricsController : ControllerBase
@@ -27,6 +30,20 @@ namespace WebApiMetricsAgent.Controllers
 		}
 
 
+		/// <summary>
+		/// Gather CPU metrics (% of processor time) at the specified time range.
+		/// </summary>
+		/// <remarks>
+		/// Request example:
+		/// 
+		/// 	GET api/metrics/cpu/from/00.00:00:00/to/100000.00:00:00
+		/// 
+		/// </remarks>
+		/// <param name="fromTime">The start time (passed from 01.01.1970 00:00:00) of the time range.</param>
+		/// <param name="toTime">The end time (passed from 01.01.1970 00:00:00) of the time range.</param>
+		/// <returns>A list of metrics gathered during the specified time period.</returns>
+		/// <response code="200">if metrics were gathered successfully.</response>
+		/// <response code="400">if specified arguments were incorrect.</response>
 		[HttpGet("from/{fromTime}/to/{toTime}")]
 		public IActionResult GetMetrics([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
 		{

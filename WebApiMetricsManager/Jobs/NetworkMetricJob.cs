@@ -23,7 +23,7 @@ namespace WebApiMetricsManager.Jobs
 			_client = client;
 		}
 
-		public Task Execute(IJobExecutionContext context)
+		public async Task Execute(IJobExecutionContext context)
 		{
 			IList<AgentInfo> agents = _agentsRepo.GetAllItems();
 
@@ -32,7 +32,7 @@ namespace WebApiMetricsManager.Jobs
 				TimeSpan fromTime = _networkMetricsRepo.GetTimeOfLatestMetricByAgentId(agent.Id);
 				TimeSpan toTime = TimeSpan.FromSeconds(DateTimeOffset.UtcNow.ToUnixTimeSeconds());
 
-				AllNetworkMetricsResponses metricsFromAgent = _client.GetAllNetworkMetrics(new GetAllNetworkMetricsApiRequest {
+				AllNetworkMetricsResponses metricsFromAgent = await _client.GetAllNetworkMetricsAsync(new GetAllNetworkMetricsApiRequest {
 					FromTime = fromTime,
 					ToTime = toTime,
 					AgentBaseAddress = agent.Url
@@ -47,8 +47,7 @@ namespace WebApiMetricsManager.Jobs
 					});
 				}
 			}
-
-			return Task.CompletedTask;
+			
 		}
 	}
 }

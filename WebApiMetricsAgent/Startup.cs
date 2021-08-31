@@ -11,8 +11,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.Data.SQLite;
+using System.IO;
+using System.Reflection;
 using AutoMapper;
 using FluentMigrator.Runner;
+using Microsoft.OpenApi.Models;
 using Quartz;
 using Quartz.Impl;
 using Quartz.Spi;
@@ -94,6 +97,23 @@ namespace WebApiMetricsAgent
 			).AddLogging(lb => lb.AddFluentMigratorConsole());
 
 			services.AddHostedService<QuartzHostedService>();
+			
+			services.AddSwaggerGen(sa => {
+				sa.SwaggerDoc("v1", new OpenApiInfo {
+					Version = "v1",
+					Title = "API сервиса агента сбора метрик",
+					Description = "Здесь представлен весь API сервиса",
+					Contact = new OpenApiContact {
+						Name = "Daniil",
+						Email = "elgoogecaf@gmail.com"
+					}
+				});
+
+				var xmlCommentsFileName = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+				var xmlCommentsFilePath = Path.Combine(AppContext.BaseDirectory, xmlCommentsFileName);
+				
+				sa.IncludeXmlComments(xmlCommentsFilePath);
+			});
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -104,6 +124,13 @@ namespace WebApiMetricsAgent
 				app.UseDeveloperExceptionPage();
 			}
 
+			app.UseSwagger();
+
+			app.UseSwaggerUI(op => {
+				op.SwaggerEndpoint("/swagger/v1/swagger.json", "API сервиса агента сбора метрик");
+				op.RoutePrefix = string.Empty;
+			});
+			
 			app.UseHttpsRedirection();
 
 			app.UseRouting();

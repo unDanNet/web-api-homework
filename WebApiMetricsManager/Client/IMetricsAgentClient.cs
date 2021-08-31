@@ -1,18 +1,19 @@
-﻿using Core.DTO.Responses;
+﻿using System.Threading.Tasks;
+using Core.DTO.Responses;
 using WebApiMetricsManager.DTO.Requests;
 
 namespace WebApiMetricsManager.Client
 {
 	public interface IMetricsAgentClient
 	{
-		AllCpuMetricsResponses GetAllCpuMetrics(GetAllCpuMetricsApiRequest request);
+		Task<AllCpuMetricsResponses> GetAllCpuMetricsAsync(GetAllCpuMetricsApiRequest request);
 
-		AllRamMetricsResponses GetAllRamMetrics(GetAllRamMetricsApiRequest request);
+		Task<AllRamMetricsResponses> GetAllRamMetricsAsync(GetAllRamMetricsApiRequest request);
 
-		AllHddMetricsResponses GetAllHddMetrics(GetAllHddMetricsApiRequest request);
+		Task<AllHddMetricsResponses> GetAllHddMetricsAsync(GetAllHddMetricsApiRequest request);
 
-		AllDotnetMetricsResponses GetAllDotnetMetrics(GetAllDotnetMetricsApiRequest request);
+		Task<AllDotnetMetricsResponses> GetAllDotnetMetricsAsync(GetAllDotnetMetricsApiRequest request);
 
-		AllNetworkMetricsResponses GetAllNetworkMetrics(GetAllNetworkMetricsApiRequest request);
+		Task<AllNetworkMetricsResponses> GetAllNetworkMetricsAsync(GetAllNetworkMetricsApiRequest request);
 	}
 }

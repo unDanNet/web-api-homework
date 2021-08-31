@@ -12,7 +12,7 @@ namespace WebApiMetricsAgent.Jobs
 	{
 		private readonly IHddMetricsRepository _repository;
 		private readonly ILogger<HddMetricJob> _logger;
-		
+
 		public HddMetricJob(IHddMetricsRepository repository, ILogger<HddMetricJob> logger)
 		{
 			_repository = repository;
@@ -30,7 +30,7 @@ namespace WebApiMetricsAgent.Jobs
 			}
 			catch (Exception e)
 			{
-				_logger.LogError(e, "Failed to read available free space from the drive");
+				_logger.LogError(e.Message);
 				return Task.CompletedTask;
 			}
 
